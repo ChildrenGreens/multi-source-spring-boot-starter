@@ -1,0 +1,47 @@
+# maven ignore
+target/
+*.jar
+!.mvn/wrapper/*
+*.war
+*.zip
+*.tar
+*.tar.gz
+.flattened-pom.xml
+
+# eclipse ignore
+.settings/
+.project
+.classpath
+
+# idea ignore
+.idea/
+*.ipr
+*.iml
+*.iws
+
+# visual-studio-code ignore
+.vscode/
+
+# fleet
+.fleet/
+
+# temp ignore
+*.log
+*.log.gz
+*.cache
+*.diff
+*.patch
+*.tmp
+
+# system ignore
+.DS_Store
+Thumbs.db
+*.orig
+
+# license check result
+license-list
+
+# grpc compiler
+compiler/gradle.properties
+compiler/build/*
+compiler/.gradle/*
