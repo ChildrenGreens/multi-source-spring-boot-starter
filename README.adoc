@@ -1,3 +1,97 @@
+image:https://img.shields.io/badge/maven%20central-v3.0.1-blue.svg["Maven Central",link="https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22quickfixj-spring-boot-starter%22"]
+image:https://img.shields.io/hexpm/l/plug.svg["Apache 2",link="http://www.apache.org/licenses/LICENSE-2.0"]
+
+
 = Spring Boot Starter for Multi Data Source (Spring Boot 3)
 
-This project is a https://spring.io/projects/spring-boot/[Spring Boot Starter] for
+This project is a multi-datasource auto-configuration project based on https://spring.io/projects/spring-boot/[Spring Boot Starter].
+It simplifies the complex process of creating multiple data sources, requiring only configuration of properties, just like in a typical Spring Boot project.
+
+
+== Getting started
+
+=== Redis Multi Data Sources
+To use Redis multi-data sources, you need to add the Redis Multi Sources Spring Boot Starter dependency to your project.
+[source,xml]
+----
+<dependency>
+    <groupId>io.children</groupId>
+    <artifactId>redis-multi-source-spring-boot-starter</artifactId>
+    <version>2.0</version>
+</dependency>
+----
+Add the following configuration to your properties file.
+[source,properties]
+----
+# set the primary-key data source
+spring.multi-sources.redis.primary-key=cn
+
+# cn data source
+spring.multi-sources.redis.source.cn.host=127.0.0.1
+spring.multi-sources.redis.source.cn.port=6379
+spring.multi-sources.redis.source.cn.password=Asd12345!.
+
+# hk data source
+spring.multi-sources.redis.sources.hk.sentinel.master=hk-redis-master
+spring.multi-sources.redis.sources.hk.database=0
+spring.multi-sources.redis.sources.hk.password=Asd12345!.
+spring.multi-sources.redis.sources.hk.lettuce.pool.enabled=true
+spring.multi-sources.redis.sources.hk.sentinel.nodes[0]=192.168.1.1:26379
+spring.multi-sources.redis.sources.hk.sentinel.nodes[1]=192.168.1.2:26379
+spring.multi-sources.redis.sources.hk.sentinel.nodes[2]=192.168.1.2:26379
+
+# us data source
+spring.multi-sources.redis.sources.us.cluster.nodes[0]=127.0.0.1:6379
+spring.multi-sources.redis.sources.us.cluster.nodes[1]=127.0.0.1:6380
+spring.multi-sources.redis.sources.us.cluster.nodes[2]=127.0.0.1:6381
+spring.multi-sources.redis.sources.us.cluster.max-redirects=3
+spring.multi-sources.redis.sources.us.password=Asd12345!.
+----
+
+
+[source,yml]
+----
+spring:
+  multi-sources:
+    redis:
+      # Set the primary-key data source
+      primary-key: cn
+
+      # cn data source
+      source:
+        cn:
+          host: 127.0.0.1
+          port: 6379
+          password: Asd12345!.
+
+      # hk data source
+      sources:
+        hk:
+          sentinel:
+            master: hk-redis-master
+            # Sentinel nodes
+            nodes:
+              - 192.168.1.1:26379
+              - 192.168.1.2:26379
+              - 192.168.1.2:26379
+          database: 0
+          password: Asd12345!.
+          lettuce:
+            pool:
+              enabled: true
+
+        # us data source
+        us:
+          cluster:
+            # Cluster nodes
+            nodes:
+              - 127.0.0.1:6379
+              - 127.0.0.1:6380
+              - 127.0.0.1:6381
+            max-redirects: 3
+          password: Asd12345!.
+----
+
+== License
+
+Spring Boot is Open Source software released under the https://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 license].
