@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.children.multi.source;
+package com.childrengreens.multi.source;
 
-import io.children.multi.source.RedisMultiSourcesConnectionConfiguration.ConnectionInfo;
+import com.childrengreens.multi.source.RedisMultiSourcesConnectionConfiguration.ConnectionInfo;
 import org.springframework.boot.autoconfigure.data.redis.RedisConnectionDetails;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.children.multi.source;
+package com.childrengreens.multi.source;
 
 /**
  * Exception thrown when a Redis URL is malformed or invalid.

@@ -1,4 +1,4 @@
-package io.children.multi.source;
+package com.childrengreens.multi.source;
 
 import io.lettuce.core.resource.DefaultClientResources;
 import org.springframework.beans.factory.ObjectProvider;

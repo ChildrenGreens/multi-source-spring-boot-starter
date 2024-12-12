@@ -1,1 +1,1 @@
-io.children.multi.source.RedisMultiSourcesAutoConfiguration
+com.childrengreens.multi.source.RedisMultiSourcesAutoConfiguration

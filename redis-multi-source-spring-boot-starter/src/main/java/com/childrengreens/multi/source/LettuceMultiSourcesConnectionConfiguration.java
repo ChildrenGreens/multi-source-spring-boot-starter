@@ -1,4 +1,4 @@
-package io.children.multi.source;
+package com.childrengreens.multi.source;
 
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;

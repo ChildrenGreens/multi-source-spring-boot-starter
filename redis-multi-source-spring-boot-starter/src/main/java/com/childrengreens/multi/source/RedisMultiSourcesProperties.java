@@ -1,4 +1,4 @@
-package io.children.multi.source;
+package com.childrengreens.multi.source;
 
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;

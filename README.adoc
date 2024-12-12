@@ -15,7 +15,7 @@ To use Redis multi-data sources, you need to add the Redis Multi Sources Spring 
 [source,xml]
 ----
 <dependency>
-    <groupId>io.children</groupId>
+    <groupId>com.childrengreens</groupId>
     <artifactId>redis-multi-source-spring-boot-starter</artifactId>
     <version>2.0</version>
 </dependency>

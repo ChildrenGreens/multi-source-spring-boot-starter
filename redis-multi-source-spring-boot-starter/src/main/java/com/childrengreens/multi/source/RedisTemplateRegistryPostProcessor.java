@@ -1,4 +1,4 @@
-package io.children.multi.source;
+package com.childrengreens.multi.source;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;

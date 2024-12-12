@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.children.multi.source;
+package com.childrengreens.multi.source;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.data.redis.RedisConnectionDetails;
