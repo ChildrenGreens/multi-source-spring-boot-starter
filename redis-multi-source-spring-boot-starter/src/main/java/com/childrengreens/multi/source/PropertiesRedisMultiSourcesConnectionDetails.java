@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.childrengreens.multi.source;
 
 import com.childrengreens.multi.source.RedisMultiSourcesConnectionConfiguration.ConnectionInfo;

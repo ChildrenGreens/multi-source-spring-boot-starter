@@ -32,7 +32,9 @@
 
     <scm>
         <url>https://github.com/ChildrenGreens/multi-source-spring-boot-starter</url>
-        <connection>https://github.com/ChildrenGreens/multi-source-spring-boot-starter.git</connection>
+        <connection>scm:git:git@github.com:ChildrenGreens/multi-source-spring-boot-starter.git</connection>
+        <developerConnection>scm:git:git@github.com:ChildrenGreens/multi-source-spring-boot-starter.git</developerConnection>
+        <tag>HEAD</tag>
     </scm>
 
     <licenses>
@@ -103,7 +105,7 @@
                     <header>licence-header.template</header>
                     <properties>
                         <!-- Values to be substituted in template -->
-                        <inceptionYear>2017</inceptionYear>
+                        <inceptionYear>2012</inceptionYear>
                         <currentYear>2024</currentYear>
                     </properties>
                     <strictCheck>true</strictCheck>
@@ -125,6 +127,31 @@
                 </executions>
             </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <release>${java.version}</release>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>3.1.1</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <useReleaseProfile>false</useReleaseProfile>
+                        <releaseProfiles>release</releaseProfiles>
+                        <goals>deploy</goals>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
     </build>
 
     <profiles>
