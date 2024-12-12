@@ -13,6 +13,10 @@
     <description>Spring Boot Starter for Multi Data Source</description>
     <url>https://github.com/ChildrenGreens/multi-source-spring-boot-starter</url>
 
+    <modules>
+        <module>redis-multi-source-spring-boot-starter</module>
+    </modules>
+
 
     <developers>
         <developer>
