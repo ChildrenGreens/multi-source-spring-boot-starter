@@ -23,7 +23,7 @@ To use Redis multi-data sources, you need to add the Redis Multi Sources Spring 
 Add the following configuration to your properties file.
 [source,properties]
 ----
-# set the primary-key data source
+# set the primary-key data source (must)
 spring.multi-sources.redis.primary-key=cn
 
 # cn data source
@@ -54,7 +54,7 @@ spring.multi-sources.redis.sources.us.password=Asd12345!.
 spring:
   multi-sources:
     redis:
-      # Set the primary-key data source
+      # set the primary-key data source (must)
       primary-key: cn
 
       # cn data source
@@ -90,6 +90,27 @@ spring:
               - 127.0.0.1:6381
             max-redirects: 3
           password: Asd12345!.
+----
+=== Redis Multi Source Runtime
+Redis Multi Sources Spring Boot Starter will create multiple sets of `LettuceConnectionFactory`, `RedisTemplate`, and `StringRedisTemplate` beans based on the configuration and register them in the Spring container.
+
+The naming convention for the bean names is: `sourceName` + `className`. Therefore, the usage is as follows:
+[source,java]
+----
+@Autowired
+@Qualifier("cnStringRedisTemplate")
+private StringRedisTemplate stringRedisTemplate;
+
+
+@Autowired
+@Qualifier("hkRedisTemplate")
+private RedisTemplate<String, Object> redisTemplate;
+
+
+@Autowired
+@Qualifier("usLettuceConnectionFactory")
+private RedisConnectionFactory redisConnectionFactory;
+
 ----
 
 == License
