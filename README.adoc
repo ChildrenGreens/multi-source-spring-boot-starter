@@ -2,7 +2,7 @@ image:https://img.shields.io/badge/maven%20central-v3.0.1-blue.svg["Maven Centra
 image:https://img.shields.io/hexpm/l/plug.svg["Apache 2",link="http://www.apache.org/licenses/LICENSE-2.0"]
 
 
-= Spring Boot Starter for Multi Data Source (Spring Boot 3)
+= Spring Boot Starter for Multi Data Source (Spring Boot 2)
 
 This project is a multi-datasource auto-configuration project based on https://spring.io/projects/spring-boot/[Spring Boot Starter].
 It simplifies the complex process of creating multiple data sources, requiring only configuration of properties, just like in a typical Spring Boot project.
@@ -17,7 +17,7 @@ To use Redis multi-data sources, you need to add the Redis Multi Sources Spring 
 <dependency>
     <groupId>com.childrengreens</groupId>
     <artifactId>redis-multi-source-spring-boot-starter</artifactId>
-    <version>2.0</version>
+    <version>1.0</version>
 </dependency>
 ----
 Add the following configuration to your properties file.
