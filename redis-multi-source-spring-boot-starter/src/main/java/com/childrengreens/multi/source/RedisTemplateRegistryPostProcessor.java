@@ -36,7 +36,9 @@ public class RedisTemplateRegistryPostProcessor implements BeanDefinitionRegistr
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 
-        if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
+        if (registry instanceof ConfigurableListableBeanFactory) {
+
+            ConfigurableListableBeanFactory beanFactory = (ConfigurableListableBeanFactory) registry;
             String[] beanNames = beanFactory.getBeanNamesForType(RedisConnectionFactory.class);
 
             for (String beanName : beanNames) {
@@ -78,4 +80,8 @@ public class RedisTemplateRegistryPostProcessor implements BeanDefinitionRegistr
 
     }
 
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+
+    }
 }

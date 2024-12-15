@@ -16,15 +16,11 @@
 package com.childrengreens.multi.source;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.data.redis.RedisConnectionDetails;
-import org.springframework.boot.autoconfigure.data.redis.RedisConnectionDetails.Cluster;
-import org.springframework.boot.autoconfigure.data.redis.RedisConnectionDetails.Node;
-import org.springframework.boot.autoconfigure.data.redis.RedisConnectionDetails.Sentinel;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties.Pool;
-import org.springframework.boot.ssl.SslBundles;
 import org.springframework.data.redis.connection.*;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,21 +52,14 @@ abstract class RedisMultiSourcesConnectionConfiguration {
 
 	private final RedisClusterConfiguration clusterConfiguration;
 
-	private final RedisConnectionDetails connectionDetails;
-
-	private final SslBundles sslBundles;
-
-	protected RedisMultiSourcesConnectionConfiguration(RedisProperties properties, RedisConnectionDetails connectionDetails,
-													   ObjectProvider<RedisStandaloneConfiguration> standaloneConfigurationProvider,
-													   ObjectProvider<RedisSentinelConfiguration> sentinelConfigurationProvider,
-													   ObjectProvider<RedisClusterConfiguration> clusterConfigurationProvider,
-													   ObjectProvider<SslBundles> sslBundles) {
+	protected RedisMultiSourcesConnectionConfiguration(RedisProperties properties,
+										   ObjectProvider<RedisStandaloneConfiguration> standaloneConfigurationProvider,
+										   ObjectProvider<RedisSentinelConfiguration> sentinelConfigurationProvider,
+										   ObjectProvider<RedisClusterConfiguration> clusterConfigurationProvider) {
 		this.properties = properties;
 		this.standaloneConfiguration = standaloneConfigurationProvider.getIfAvailable();
 		this.sentinelConfiguration = sentinelConfigurationProvider.getIfAvailable();
 		this.clusterConfiguration = clusterConfigurationProvider.getIfAvailable();
-		this.connectionDetails = connectionDetails;
-		this.sslBundles = sslBundles.getIfAvailable();
 	}
 
 	protected final RedisStandaloneConfiguration getStandaloneConfig() {
@@ -78,11 +67,20 @@ abstract class RedisMultiSourcesConnectionConfiguration {
 			return this.standaloneConfiguration;
 		}
 		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-		config.setHostName(this.connectionDetails.getStandalone().getHost());
-		config.setPort(this.connectionDetails.getStandalone().getPort());
-		config.setUsername(this.connectionDetails.getUsername());
-		config.setPassword(RedisPassword.of(this.connectionDetails.getPassword()));
-		config.setDatabase(this.connectionDetails.getStandalone().getDatabase());
+		if (StringUtils.hasText(this.properties.getUrl())) {
+			RedisMultiSourcesConnectionConfiguration.ConnectionInfo connectionInfo = parseUrl(this.properties.getUrl());
+			config.setHostName(connectionInfo.getHostName());
+			config.setPort(connectionInfo.getPort());
+			config.setUsername(connectionInfo.getUsername());
+			config.setPassword(RedisPassword.of(connectionInfo.getPassword()));
+		}
+		else {
+			config.setHostName(this.properties.getHost());
+			config.setPort(this.properties.getPort());
+			config.setUsername(this.properties.getUsername());
+			config.setPassword(RedisPassword.of(this.properties.getPassword()));
+		}
+		config.setDatabase(this.properties.getDatabase());
 		return config;
 	}
 
@@ -90,21 +88,20 @@ abstract class RedisMultiSourcesConnectionConfiguration {
 		if (this.sentinelConfiguration != null) {
 			return this.sentinelConfiguration;
 		}
-		if (this.connectionDetails.getSentinel() != null) {
+		RedisProperties.Sentinel sentinelProperties = this.properties.getSentinel();
+		if (sentinelProperties != null) {
 			RedisSentinelConfiguration config = new RedisSentinelConfiguration();
-			config.master(this.connectionDetails.getSentinel().getMaster());
-			config.setSentinels(createSentinels(this.connectionDetails.getSentinel()));
-			config.setUsername(this.connectionDetails.getUsername());
-			String password = this.connectionDetails.getPassword();
-			if (password != null) {
-				config.setPassword(RedisPassword.of(password));
+			config.master(sentinelProperties.getMaster());
+			config.setSentinels(createSentinels(sentinelProperties));
+			config.setUsername(this.properties.getUsername());
+			if (this.properties.getPassword() != null) {
+				config.setPassword(RedisPassword.of(this.properties.getPassword()));
 			}
-			config.setSentinelUsername(this.connectionDetails.getSentinel().getUsername());
-			String sentinelPassword = this.connectionDetails.getSentinel().getPassword();
-			if (sentinelPassword != null) {
-				config.setSentinelPassword(RedisPassword.of(sentinelPassword));
+			config.setSentinelUsername(sentinelProperties.getUsername());
+			if (sentinelProperties.getPassword() != null) {
+				config.setSentinelPassword(RedisPassword.of(sentinelProperties.getPassword()));
 			}
-			config.setDatabase(this.connectionDetails.getSentinel().getDatabase());
+			config.setDatabase(this.properties.getDatabase());
 			return config;
 		}
 		return null;
@@ -118,41 +115,23 @@ abstract class RedisMultiSourcesConnectionConfiguration {
 		if (this.clusterConfiguration != null) {
 			return this.clusterConfiguration;
 		}
-		RedisProperties.Cluster clusterProperties = this.properties.getCluster();
-		if (this.connectionDetails.getCluster() != null) {
-			RedisClusterConfiguration config = new RedisClusterConfiguration();
-			config.setClusterNodes(getNodes(this.connectionDetails.getCluster()));
-			if (clusterProperties != null && clusterProperties.getMaxRedirects() != null) {
-				config.setMaxRedirects(clusterProperties.getMaxRedirects());
-			}
-			config.setUsername(this.connectionDetails.getUsername());
-			String password = this.connectionDetails.getPassword();
-			if (password != null) {
-				config.setPassword(RedisPassword.of(password));
-			}
-			return config;
+		if (this.properties.getCluster() == null) {
+			return null;
 		}
-		return null;
-	}
-
-	private List<RedisNode> getNodes(Cluster cluster) {
-		return cluster.getNodes().stream().map(this::asRedisNode).toList();
-	}
-
-	private RedisNode asRedisNode(Node node) {
-		return new RedisNode(node.host(), node.port());
+		RedisProperties.Cluster clusterProperties = this.properties.getCluster();
+		RedisClusterConfiguration config = new RedisClusterConfiguration(clusterProperties.getNodes());
+		if (clusterProperties.getMaxRedirects() != null) {
+			config.setMaxRedirects(clusterProperties.getMaxRedirects());
+		}
+		config.setUsername(this.properties.getUsername());
+		if (this.properties.getPassword() != null) {
+			config.setPassword(RedisPassword.of(this.properties.getPassword()));
+		}
+		return config;
 	}
 
 	protected final RedisProperties getProperties() {
 		return this.properties;
-	}
-
-	protected SslBundles getSslBundles() {
-		return this.sslBundles;
-	}
-
-	protected boolean isSslEnabled() {
-		return getProperties().getSsl().isEnabled();
 	}
 
 	protected boolean isPoolEnabled(Pool pool) {
@@ -160,23 +139,20 @@ abstract class RedisMultiSourcesConnectionConfiguration {
 		return (enabled != null) ? enabled : COMMONS_POOL2_AVAILABLE;
 	}
 
-	private List<RedisNode> createSentinels(Sentinel sentinel) {
+	private List<RedisNode> createSentinels(RedisProperties.Sentinel sentinel) {
 		List<RedisNode> nodes = new ArrayList<>();
-		for (Node node : sentinel.getNodes()) {
-			nodes.add(asRedisNode(node));
+		for (String node : sentinel.getNodes()) {
+			try {
+				nodes.add(RedisNode.fromString(node));
+			}
+			catch (RuntimeException ex) {
+				throw new IllegalStateException("Invalid redis sentinel property '" + node + "'", ex);
+			}
 		}
 		return nodes;
 	}
 
-	protected final boolean urlUsesSsl() {
-		return parseUrl(this.properties.getUrl()).isUseSsl();
-	}
-
-	protected final RedisConnectionDetails getConnectionDetails() {
-		return this.connectionDetails;
-	}
-
-	static ConnectionInfo parseUrl(String url) {
+	protected RedisMultiSourcesConnectionConfiguration.ConnectionInfo parseUrl(String url) {
 		try {
 			URI uri = new URI(url);
 			String scheme = uri.getScheme();
@@ -197,7 +173,7 @@ abstract class RedisMultiSourcesConnectionConfiguration {
 					password = candidate;
 				}
 			}
-			return new ConnectionInfo(uri, useSsl, username, password);
+			return new RedisMultiSourcesConnectionConfiguration.ConnectionInfo(uri, useSsl, username, password);
 		}
 		catch (URISyntaxException ex) {
 			throw new RedisUrlSyntaxException(url, ex);
@@ -221,12 +197,16 @@ abstract class RedisMultiSourcesConnectionConfiguration {
 			this.password = password;
 		}
 
-		URI getUri() {
-			return this.uri;
-		}
-
 		boolean isUseSsl() {
 			return this.useSsl;
+		}
+
+		String getHostName() {
+			return this.uri.getHost();
+		}
+
+		int getPort() {
+			return this.uri.getPort();
 		}
 
 		String getUsername() {

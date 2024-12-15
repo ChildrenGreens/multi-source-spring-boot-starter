@@ -17,11 +17,12 @@ package com.childrengreens.multi.source;
 
 import io.lettuce.core.resource.DefaultClientResources;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.ClientResourcesBuilderCustomizer;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 
@@ -31,7 +32,8 @@ import org.springframework.context.annotation.Import;
  * @author ChildrenGreens
  */
 
-@AutoConfiguration(before = RedisAutoConfiguration.class)
+@Configuration(proxyBeanMethods = false)
+@AutoConfigureBefore(RedisAutoConfiguration.class)
 @Import({LettuceConnectionMultiSourcesRegistrar.class, RedisTemplateRegistryPostProcessor.class})
 public class RedisMultiSourcesAutoConfiguration {
 

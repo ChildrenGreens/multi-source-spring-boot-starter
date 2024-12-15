@@ -1,0 +1,3 @@
+# AutoConfigurations
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.childrengreens.multi.source.RedisMultiSourcesAutoConfiguration

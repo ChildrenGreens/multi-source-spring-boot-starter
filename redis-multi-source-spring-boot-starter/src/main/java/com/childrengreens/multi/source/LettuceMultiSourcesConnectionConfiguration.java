@@ -24,9 +24,6 @@ import io.lettuce.core.resource.ClientResources;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.data.redis.*;
-import org.springframework.boot.ssl.SslBundle;
-import org.springframework.boot.ssl.SslBundles;
-import org.springframework.boot.ssl.SslOptions;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -47,26 +44,15 @@ class LettuceMultiSourcesConnectionConfiguration extends RedisMultiSourcesConnec
 
 
     LettuceMultiSourcesConnectionConfiguration(RedisProperties properties,
-                                   ObjectProvider<RedisStandaloneConfiguration> standaloneConfigurationProvider,
-                                   ObjectProvider<RedisSentinelConfiguration> sentinelConfigurationProvider,
-                                   ObjectProvider<RedisClusterConfiguration> clusterConfigurationProvider,
-                                   RedisConnectionDetails connectionDetails, ObjectProvider<SslBundles> sslBundles) {
-        super(properties, connectionDetails, standaloneConfigurationProvider, sentinelConfigurationProvider,
-                clusterConfigurationProvider, sslBundles);
+                                               ObjectProvider<RedisStandaloneConfiguration> standaloneConfigurationProvider,
+                                               ObjectProvider<RedisSentinelConfiguration> sentinelConfigurationProvider,
+                                               ObjectProvider<RedisClusterConfiguration> clusterConfigurationProvider) {
+        super(properties, standaloneConfigurationProvider, sentinelConfigurationProvider, clusterConfigurationProvider);
     }
 
 
 
-    LettuceConnectionFactory createConnectionFactory(
-            ObjectProvider<LettuceClientConfigurationBuilderCustomizer> clientConfigurationBuilderCustomizers,
-            ObjectProvider<LettuceClientOptionsBuilderCustomizer> clientOptionsBuilderCustomizers,
-            ClientResources clientResources) {
-        LettuceClientConfiguration clientConfig = getLettuceClientConfiguration(clientConfigurationBuilderCustomizers,
-                clientOptionsBuilderCustomizers, clientResources, getProperties().getLettuce().getPool());
-        return createLettuceConnectionFactory(clientConfig);
-    }
-
-    private LettuceConnectionFactory createLettuceConnectionFactory(LettuceClientConfiguration clientConfiguration) {
+    LettuceConnectionFactory createLettuceConnectionFactory(LettuceClientConfiguration clientConfiguration) {
         if (getSentinelConfig() != null) {
             return new LettuceConnectionFactory(getSentinelConfig(), clientConfiguration);
         }
@@ -76,18 +62,17 @@ class LettuceMultiSourcesConnectionConfiguration extends RedisMultiSourcesConnec
         return new LettuceConnectionFactory(getStandaloneConfig(), clientConfiguration);
     }
 
-    private LettuceClientConfiguration getLettuceClientConfiguration(
-            ObjectProvider<LettuceClientConfigurationBuilderCustomizer> clientConfigurationBuilderCustomizers,
-            ObjectProvider<LettuceClientOptionsBuilderCustomizer> clientOptionsBuilderCustomizers,
+    LettuceClientConfiguration getLettuceClientConfiguration(
+            ObjectProvider<LettuceClientConfigurationBuilderCustomizer> builderCustomizers,
             ClientResources clientResources, RedisProperties.Pool pool) {
         LettuceClientConfiguration.LettuceClientConfigurationBuilder builder = createBuilder(pool);
         applyProperties(builder);
         if (StringUtils.hasText(getProperties().getUrl())) {
             customizeConfigurationFromUrl(builder);
         }
-        builder.clientOptions(createClientOptions(clientOptionsBuilderCustomizers));
+        builder.clientOptions(createClientOptions());
         builder.clientResources(clientResources);
-        clientConfigurationBuilderCustomizers.orderedStream().forEach((customizer) -> customizer.customize(builder));
+        builderCustomizers.orderedStream().forEach((customizer) -> customizer.customize(builder));
         return builder.build();
     }
 
@@ -98,8 +83,9 @@ class LettuceMultiSourcesConnectionConfiguration extends RedisMultiSourcesConnec
         return LettuceClientConfiguration.builder();
     }
 
-    private void applyProperties(LettuceClientConfiguration.LettuceClientConfigurationBuilder builder) {
-        if (isSslEnabled()) {
+    private LettuceClientConfiguration.LettuceClientConfigurationBuilder applyProperties(
+            LettuceClientConfiguration.LettuceClientConfigurationBuilder builder) {
+        if (getProperties().isSsl()) {
             builder.useSsl();
         }
         if (getProperties().getTimeout() != null) {
@@ -114,32 +100,16 @@ class LettuceMultiSourcesConnectionConfiguration extends RedisMultiSourcesConnec
         if (StringUtils.hasText(getProperties().getClientName())) {
             builder.clientName(getProperties().getClientName());
         }
+        return builder;
     }
 
-    private ClientOptions createClientOptions(
-            ObjectProvider<LettuceClientOptionsBuilderCustomizer> clientConfigurationBuilderCustomizers) {
+    private ClientOptions createClientOptions() {
         ClientOptions.Builder builder = initializeClientOptionsBuilder();
         Duration connectTimeout = getProperties().getConnectTimeout();
         if (connectTimeout != null) {
             builder.socketOptions(SocketOptions.builder().connectTimeout(connectTimeout).build());
         }
-        if (isSslEnabled() && getProperties().getSsl().getBundle() != null) {
-            SslBundle sslBundle = getSslBundles().getBundle(getProperties().getSsl().getBundle());
-            io.lettuce.core.SslOptions.Builder sslOptionsBuilder = io.lettuce.core.SslOptions.builder();
-            sslOptionsBuilder.keyManager(sslBundle.getManagers().getKeyManagerFactory());
-            sslOptionsBuilder.trustManager(sslBundle.getManagers().getTrustManagerFactory());
-            SslOptions sslOptions = sslBundle.getOptions();
-            if (sslOptions.getCiphers() != null) {
-                sslOptionsBuilder.cipherSuites(sslOptions.getCiphers());
-            }
-            if (sslOptions.getEnabledProtocols() != null) {
-                sslOptionsBuilder.protocols(sslOptions.getEnabledProtocols());
-            }
-            builder.sslOptions(sslOptionsBuilder.build());
-        }
-        builder.timeoutOptions(TimeoutOptions.enabled());
-        clientConfigurationBuilderCustomizers.orderedStream().forEach((customizer) -> customizer.customize(builder));
-        return builder.build();
+        return builder.timeoutOptions(TimeoutOptions.enabled()).build();
     }
 
     private ClientOptions.Builder initializeClientOptionsBuilder() {
@@ -160,7 +130,8 @@ class LettuceMultiSourcesConnectionConfiguration extends RedisMultiSourcesConnec
     }
 
     private void customizeConfigurationFromUrl(LettuceClientConfiguration.LettuceClientConfigurationBuilder builder) {
-        if (urlUsesSsl()) {
+        RedisMultiSourcesConnectionConfiguration.ConnectionInfo connectionInfo = parseUrl(getProperties().getUrl());
+        if (connectionInfo.isUseSsl()) {
             builder.useSsl();
         }
     }
@@ -168,7 +139,7 @@ class LettuceMultiSourcesConnectionConfiguration extends RedisMultiSourcesConnec
     /**
      * Inner class to allow optional commons-pool2 dependency.
      */
-    private static final class PoolBuilderFactory {
+    private static class PoolBuilderFactory {
 
         LettuceClientConfiguration.LettuceClientConfigurationBuilder createBuilder(RedisProperties.Pool properties) {
             return LettucePoolingClientConfiguration.builder().poolConfig(getPoolConfig(properties));
