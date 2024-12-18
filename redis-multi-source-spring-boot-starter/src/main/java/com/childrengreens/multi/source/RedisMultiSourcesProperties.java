@@ -26,25 +26,7 @@ import java.util.Map;
  * @author ChildrenGreens
  */
 @ConfigurationProperties(prefix = "spring.multi-sources.redis")
-public class RedisMultiSourcesProperties {
+public class RedisMultiSourcesProperties extends MultiSourcesProperties<RedisProperties> {
 
-    private Map<String, RedisProperties> sources;
 
-    private String primaryKey;
-
-    public Map<String, RedisProperties> getSources() {
-        return sources;
-    }
-
-    public void setSources(Map<String, RedisProperties> sources) {
-        this.sources = sources;
-    }
-
-    public String getPrimaryKey() {
-        return primaryKey;
-    }
-
-    public void setPrimaryKey(String primaryKey) {
-        this.primaryKey = primaryKey;
-    }
 }

@@ -10,11 +10,10 @@
         <version>2.0</version>
     </parent>
 
-    <artifactId>redis-multi-source-spring-boot-starter</artifactId>
-    <name>Spring Boot Starter for Multi Source :: Redis</name>
-    <description>Spring Boot Starter for Multi Data Source :: Redis</description>
+    <artifactId>amqp-multi-source-spring-boot-starter</artifactId>
+    <name>Spring Boot Starter for Multi Source :: Amqp</name>
+    <description>Spring Boot Starter for Multi Data Source :: Amqp</description>
     <packaging>jar</packaging>
-
 
     <dependencies>
         <dependency>
@@ -31,7 +30,7 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
         <dependency>
@@ -39,13 +38,5 @@
             <artifactId>context-multi-source-spring-boot-starter</artifactId>
             <version>2.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-pool2</artifactId>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
-
-    
 </project>
