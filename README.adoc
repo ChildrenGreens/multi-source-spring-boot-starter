@@ -17,7 +17,7 @@ To use Redis multi-data sources, you need to add the Redis Multi Sources Spring 
 <dependency>
     <groupId>com.childrengreens</groupId>
     <artifactId>redis-multi-source-spring-boot-starter</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
 </dependency>
 ----
 Add the following configuration to your properties file.
@@ -110,6 +110,87 @@ private RedisTemplate<String, Object> redisTemplate;
 @Autowired
 @Qualifier("usLettuceConnectionFactory")
 private RedisConnectionFactory redisConnectionFactory;
+
+----
+
+
+=== RabbitMQ Multi Data Sources
+To use RabbitMQ multi-data sources, you need to add the AMQP Multi Sources Spring Boot Starter dependency to your project.
+[source,xml]
+----
+<dependency>
+    <groupId>com.childrengreens</groupId>
+    <artifactId>amqp-multi-source-spring-boot-starter</artifactId>
+    <version>2.1</version>
+</dependency>
+----
+Add the following configuration to your properties file.
+[source,properties]
+----
+# set the primary-key data source (must)
+spring.multi-sources.rabbitmq.primary-key=cn
+
+# cn data source
+spring.multi-sources.rabbitmq.sources.cn.port=5672
+spring.multi-sources.rabbitmq.sources.cn.host=192.168.1.1
+spring.multi-sources.rabbitmq.sources.cn.username=guest
+spring.multi-sources.rabbitmq.sources.cn.password=guest
+spring.multi-sources.rabbitmq.sources.cn.virtual-host=/
+
+# hk data source
+spring.multi-sources.rabbitmq.sources.hk.port=5672
+spring.multi-sources.rabbitmq.sources.hk.host=192.168.1.2
+spring.multi-sources.rabbitmq.sources.hk.username=guest
+spring.multi-sources.rabbitmq.sources.hk.password=guest
+spring.multi-sources.rabbitmq.sources.hk.virtual-host=/
+
+----
+
+
+[source,yml]
+----
+# set the primary-key data source (must)
+spring:
+  multi-sources:
+    rabbitmq:
+      primary-key: cn
+
+      # cn data source
+      sources:
+        cn:
+          port: 5672
+          host: 192.168.1.1
+          username: guest
+          password: guest
+          virtual-host: /
+
+      # hk data source
+        hk:
+          port: 5672
+          host: 192.168.1.2
+          username: guest
+          password: guest
+          virtual-host: /
+----
+=== RabbitMQ Multi Source Runtime
+AMQP Multi Sources Spring Boot Starter will create multiple sets of `CachingConnectionFactory`, `SimpleRabbitListenerContainerFactory`, `RabbitTemplate`, and `RabbitMessagingTemplate` beans based on the configuration and register them in the Spring container.
+
+The naming convention for the bean names is: `sourceName` + `className`. Therefore, the usage is as follows:
+[source,java]
+----
+@Autowired
+@Qualifier("cnCachingConnectionFactory")
+private CachingConnectionFactory cachingConnectionFactory;
+
+
+@Autowired
+@Qualifier("hkRabbitTemplate")
+private RabbitTemplate rabbitTemplate;
+
+
+@Autowired
+@Qualifier("hkSimpleRabbitListenerContainerFactory")
+private SimpleRabbitListenerContainerFactory simpleRabbitListenerContainerFactory;
 
 ----
 

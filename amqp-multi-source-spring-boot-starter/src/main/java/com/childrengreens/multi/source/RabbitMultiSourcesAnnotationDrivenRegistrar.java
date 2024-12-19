@@ -81,7 +81,7 @@ public class RabbitMultiSourcesAnnotationDrivenRegistrar extends AbstractRabbitM
                                 });
 
 
-                        // register DirectRabbitListenerContainerFactoryConfigurer
+                        // register SimpleRabbitListenerContainerFactory
                         registerBeanDefinition(registry,
                                 SimpleRabbitListenerContainerFactory.class,
                                 generateBeanName(SimpleRabbitListenerContainerFactory.class, name),
