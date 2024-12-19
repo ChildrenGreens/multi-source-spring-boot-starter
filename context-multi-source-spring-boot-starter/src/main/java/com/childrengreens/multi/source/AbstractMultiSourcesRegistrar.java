@@ -50,7 +50,7 @@ public abstract class AbstractMultiSourcesRegistrar<D> implements ImportBeanDefi
         Class<MultiSourcesProperties<D>> clazz = (Class<MultiSourcesProperties<D>>) getMultiSourcesPropertiesClass();
 
         ConfigurationProperties annotation = clazz.getAnnotation(ConfigurationProperties.class);
-        BindResult<MultiSourcesProperties<D>> bind = Binder.get(environment).bind(annotation.value(), clazz);
+        BindResult<MultiSourcesProperties<D>> bind = Binder.get(environment).bind(annotation.prefix(), clazz);
 
         MultiSourcesProperties<D> multiSourcesProperties = bind.get();
 
