@@ -93,7 +93,7 @@ public class RabbitMultiSourcesTemplateRegistrar extends AbstractRabbitMultiSour
 
             registerBeanDefinition(registry,
                     AmqpAdmin.class,
-                    generateBeanName(RabbitTemplate.class, name),
+                    generateBeanName(AmqpAdmin.class, name),
                     isPrimary,
                     () -> {
                         ConnectionFactory connectionFactory = getConnectionFactoryBean(name, beanFactory);

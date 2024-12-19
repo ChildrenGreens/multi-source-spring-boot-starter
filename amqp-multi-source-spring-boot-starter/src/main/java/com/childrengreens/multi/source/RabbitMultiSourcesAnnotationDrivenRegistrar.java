@@ -52,9 +52,8 @@ public class RabbitMultiSourcesAnnotationDrivenRegistrar extends AbstractRabbitM
         if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
             try {
                 Class<?> clazz = ClassUtils.forName(rabbitAnnotationDrivenConfigurationClassName, ClassUtils.getDefaultClassLoader());
-                Method simpleListenerConfigurer = ClassUtils.getMethod(clazz, "simpleListenerConfigurer");
-                Method directListenerConfigurer = ClassUtils.getMethod(clazz, "directListenerConfigurer");
-
+                Method simpleListenerConfigurer = clazz.getDeclaredMethod("simpleListenerConfigurer");
+                Method directListenerConfigurer = clazz.getDeclaredMethod("directListenerConfigurer");
                 RabbitProperties.ContainerType type = source.getListener().getType();
 
                 switch (type) {
@@ -146,7 +145,7 @@ public class RabbitMultiSourcesAnnotationDrivenRegistrar extends AbstractRabbitM
 
                     }
                 }
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException | NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
         }

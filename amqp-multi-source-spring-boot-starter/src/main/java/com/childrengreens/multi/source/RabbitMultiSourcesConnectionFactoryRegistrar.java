@@ -26,6 +26,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.amqp.*;
 import org.springframework.boot.ssl.SslBundles;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 
 /**
@@ -33,7 +34,8 @@ import org.springframework.core.io.ResourceLoader;
  *
  * @author ChildrenGreens
  */
-public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbitMultiSourcesRegistrar {
+public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbitMultiSourcesRegistrar implements ResourceLoaderAware {
+    private ResourceLoader resourceLoader;
 
     private static final String rabbitConnectionDetailsClassName = "org.springframework.boot.autoconfigure.amqp.PropertiesRabbitConnectionDetails";
 
@@ -58,8 +60,6 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
                     rabbitConnectionFactoryBeanConfigurerBeanName,
                     isPrimary,
                     () -> {
-
-                        ResourceLoader resourceLoader = beanFactory.getBean(ResourceLoader.class);
                         RabbitConnectionDetails connectionDetails = beanFactory.getBean(rabbitConnectionDetailsBeanName, RabbitConnectionDetails.class);
                         ObjectProvider<CredentialsProvider> credentialsProvider = beanFactory.getBeanProvider(CredentialsProvider.class);
                         ObjectProvider<CredentialsRefreshService> credentialsRefreshService = beanFactory.getBeanProvider(CredentialsRefreshService.class);
@@ -114,6 +114,8 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
     }
 
 
-
-
+    @Override
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 }
