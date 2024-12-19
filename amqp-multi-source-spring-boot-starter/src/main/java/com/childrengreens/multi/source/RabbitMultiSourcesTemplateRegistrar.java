@@ -1,3 +1,18 @@
+/*
+ * Copyright 2012-2024 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.childrengreens.multi.source;
 
 import org.springframework.amqp.core.AmqpAdmin;
@@ -14,9 +29,12 @@ import org.springframework.boot.autoconfigure.amqp.RabbitRetryTemplateCustomizer
 import org.springframework.boot.autoconfigure.amqp.RabbitTemplateConfigurer;
 import org.springframework.boot.autoconfigure.amqp.RabbitTemplateCustomizer;
 
-import java.util.Objects;
-
-public class RabbitMultiSourcesTemplateRegistrar extends AbstractMultiSourcesRegistrar<RabbitProperties> {
+/**
+ * RabbitMQ multi-data-source template BeanDefinition registrar.
+ *
+ * @author ChildrenGreens
+ */
+public class RabbitMultiSourcesTemplateRegistrar extends AbstractRabbitMultiSourcesRegistrar {
     @Override
     void registerBeanDefinitionsForSource(String name, RabbitProperties source, BeanDefinitionRegistry registry, Boolean isPrimary) {
         if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
@@ -66,7 +84,13 @@ public class RabbitMultiSourcesTemplateRegistrar extends AbstractMultiSourcesReg
                         return new RabbitMessagingTemplate(rabbitTemplate);
                     });
 
+
             // register AmqpAdmin
+            Boolean isDynamic = environment.getProperty("spring.rabbitmq.dynamic", boolean.class, false);
+            if (isDynamic){
+                return;
+            }
+
             registerBeanDefinition(registry,
                     AmqpAdmin.class,
                     generateBeanName(RabbitTemplate.class, name),
@@ -79,22 +103,5 @@ public class RabbitMultiSourcesTemplateRegistrar extends AbstractMultiSourcesReg
         }
     }
 
-    private ConnectionFactory getConnectionFactoryBean(String name, ConfigurableListableBeanFactory beanFactory) {
-        String[] beanNamesForType = beanFactory.getBeanNamesForType(ConnectionFactory.class);
-        ConnectionFactory connectionFactory = null;
-        for (String beanName : beanNamesForType) {
-            if (beanName.startsWith(name)) {
-                connectionFactory = beanFactory.getBean(beanName, ConnectionFactory.class);
-            }
-        }
-        if (Objects.isNull(connectionFactory)) {
-            throw new RuntimeException("source key: " + name + ", " + "RabbitTemplate connection factory not found");
-        }
-        return connectionFactory;
-    }
 
-    @Override
-    Class<? extends MultiSourcesProperties<RabbitProperties>> getMultiSourcesPropertiesClass() {
-        return RabbitMultiSourcesProperties.class;
-    }
 }

@@ -18,8 +18,6 @@ package com.childrengreens.multi.source;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.Map;
-
 /**
  * Configuration properties for multi data source Redis.
  *
