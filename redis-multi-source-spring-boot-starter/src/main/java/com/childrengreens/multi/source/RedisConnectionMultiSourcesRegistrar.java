@@ -19,33 +19,38 @@ import io.lettuce.core.resource.ClientResources;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
-import org.springframework.boot.autoconfigure.data.redis.LettuceClientOptionsBuilderCustomizer;
-import org.springframework.boot.autoconfigure.data.redis.RedisConnectionDetails;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.autoconfigure.data.redis.*;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
- * Dynamically create multiple {@link RedisConnectionDetails} and {@link LettuceConnectionFactory} based on Environment.
+ * Dynamically create multiple {@link RedisConnectionDetails} and {@link LettuceConnectionFactory} or {@link JedisConnectionFactory} based on Environment.
  *
  * @author ChildrenGreens
  */
-public class LettuceConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRegistrar<RedisProperties> {
+public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRegistrar<RedisProperties> {
 
 
     private static final String redisConnectionDetailsClassName = "org.springframework.boot.autoconfigure.data.redis.PropertiesRedisConnectionDetails";
 
     private static final String lettuceConnectionConfigurationClassName = "org.springframework.boot.autoconfigure.data.redis.LettuceConnectionConfiguration";
+
+    private static final String jedisConnectionConfigurationClassName = "org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration";
+
+    private static final boolean JEDIS_AVAILABLE = ClassUtils.isPresent("redis.clients.jedis.Jedis", ClassUtils.getDefaultClassLoader());
+
 
     @Override
     void registerBeanDefinitionsForSource(String name, RedisProperties source, BeanDefinitionRegistry registry, Boolean isPrimary) {
@@ -59,14 +64,19 @@ public class LettuceConnectionMultiSourcesRegistrar extends AbstractMultiSources
                     isPrimary,
                     () -> (RedisConnectionDetails) newInstance(redisConnectionDetailsClassName, new Class[]{RedisProperties.class}, source));
 
+            // JedisConnectionFactory or LettuceConnectionFactory
+            boolean isJedisConnectionFactory = Objects.nonNull(source.getClientType())
+                    && source.getClientType() == RedisProperties.ClientType.JEDIS
+                    && JEDIS_AVAILABLE;
+            Class<? extends RedisConnectionFactory> redisConnectionFactory = isJedisConnectionFactory ? JedisConnectionFactory.class : LettuceConnectionFactory.class;
 
-            // register LettuceConnectionFactory
+            // register RedisConnectionFactory
             registerBeanDefinition(registry,
-                    LettuceConnectionFactory.class,
-                    generateBeanName(LettuceConnectionFactory.class, name),
+                    RedisConnectionFactory.class,
+                    generateBeanName(redisConnectionFactory, name),
                     isPrimary,
                     () -> {
-                        // new LettuceConnectionConfiguration
+                        // new JedisConnectionFactory or LettuceConnectionFactory
                         RedisConnectionDetails connectionDetails = beanFactory.getBean(redisConnectionDetailsBeanName, RedisConnectionDetails.class);
                         ObjectProvider<RedisStandaloneConfiguration> standaloneProvider = beanFactory.getBeanProvider(RedisStandaloneConfiguration.class);
                         ObjectProvider<RedisSentinelConfiguration> sentinelProvider = beanFactory.getBeanProvider(RedisSentinelConfiguration.class);
@@ -74,9 +84,9 @@ public class LettuceConnectionMultiSourcesRegistrar extends AbstractMultiSources
                         ObjectProvider<SslBundles> sslBundlesProvider = beanFactory.getBeanProvider(SslBundles.class);
 
                         try {
-                            Class<?> clazz = ClassUtils.forName(lettuceConnectionConfigurationClassName, ClassUtils.getDefaultClassLoader());
+                            String connectionConfigurationClassName = isJedisConnectionFactory ? lettuceConnectionConfigurationClassName : jedisConnectionConfigurationClassName;
+                            Class<?> clazz = ClassUtils.forName(connectionConfigurationClassName, ClassUtils.getDefaultClassLoader());
                             Constructor<?> constructor = clazz.getDeclaredConstructors()[0];
-                            Method createConnectionFactory = clazz.getDeclaredMethod("createConnectionFactory", ObjectProvider.class, ObjectProvider.class, ClientResources.class);
                             constructor.setAccessible(true);
                             Object configuration = constructor.newInstance(source,
                                     standaloneProvider,
@@ -86,19 +96,33 @@ public class LettuceConnectionMultiSourcesRegistrar extends AbstractMultiSources
                                     sslBundlesProvider);
 
 
-                            ObjectProvider<LettuceClientConfigurationBuilderCustomizer> clientConfigurationBuilderCustomizers = beanFactory.getBeanProvider(LettuceClientConfigurationBuilderCustomizer.class);
-                            ObjectProvider<LettuceClientOptionsBuilderCustomizer> clientOptionsBuilderCustomizers = beanFactory.getBeanProvider(LettuceClientOptionsBuilderCustomizer.class);
-                            ClientResources clientResources = beanFactory.getBean(ClientResources.class);
+                            if (isJedisConnectionFactory) {
+                                ObjectProvider<JedisClientConfigurationBuilderCustomizer> builderCustomizers = beanFactory.getBeanProvider(JedisClientConfigurationBuilderCustomizer.class);
 
-                            createConnectionFactory.setAccessible(true);
-                            LettuceConnectionFactory factory = (LettuceConnectionFactory) createConnectionFactory.invoke(configuration, clientConfigurationBuilderCustomizers, clientOptionsBuilderCustomizers, clientResources);
+                                Method createJedisConnectionFactory = clazz.getDeclaredMethod("createJedisConnectionFactory", ObjectProvider.class);
+                                createJedisConnectionFactory.setAccessible(true);
+                                JedisConnectionFactory factory = (JedisConnectionFactory) createJedisConnectionFactory.invoke(configuration, builderCustomizers);
+                                if (isVirtualThreads()) {
+                                    SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("redis-");
+                                    executor.setVirtualThreads(true);
+                                    factory.setExecutor(executor);
+                                }
+                                return factory;
+                            } else {
+                                ObjectProvider<LettuceClientConfigurationBuilderCustomizer> clientConfigurationBuilderCustomizers = beanFactory.getBeanProvider(LettuceClientConfigurationBuilderCustomizer.class);
+                                ObjectProvider<LettuceClientOptionsBuilderCustomizer> clientOptionsBuilderCustomizers = beanFactory.getBeanProvider(LettuceClientOptionsBuilderCustomizer.class);
+                                ClientResources clientResources = beanFactory.getBean(ClientResources.class);
 
-                            if (isVirtualThreads()) {
-                                SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("redis-");
-                                executor.setVirtualThreads(true);
-                                factory.setExecutor(executor);
+                                Method createConnectionFactory = clazz.getDeclaredMethod("createConnectionFactory", ObjectProvider.class, ObjectProvider.class, ClientResources.class);
+                                createConnectionFactory.setAccessible(true);
+                                LettuceConnectionFactory factory = (LettuceConnectionFactory) createConnectionFactory.invoke(configuration, clientConfigurationBuilderCustomizers, clientOptionsBuilderCustomizers, clientResources);
+                                if (isVirtualThreads()) {
+                                    SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("redis-");
+                                    executor.setVirtualThreads(true);
+                                    factory.setExecutor(executor);
+                                }
+                                return factory;
                             }
-                            return factory;
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                                  ClassNotFoundException | NoSuchMethodException e) {
                             throw new RuntimeException(e);

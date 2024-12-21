@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.childrengreens</groupId>
         <artifactId>multi-source-spring-boot-starter</artifactId>
-        <version>2.1</version>
+        <version>2.2</version>
     </parent>
 
     <artifactId>redis-multi-source-spring-boot-starter</artifactId>
@@ -37,12 +37,19 @@
         <dependency>
             <groupId>com.childrengreens</groupId>
             <artifactId>context-multi-source-spring-boot-starter</artifactId>
-            <version>2.1</version>
+            <version>2.2</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
             <optional>true</optional>
         </dependency>
     </dependencies>

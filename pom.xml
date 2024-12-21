@@ -6,7 +6,7 @@
 
     <groupId>com.childrengreens</groupId>
     <artifactId>multi-source-spring-boot-starter</artifactId>
-    <version>2.1</version>
+    <version>2.2</version>
     <packaging>pom</packaging>
 
     <name>Spring Boot Starter for Multi Source</name>
@@ -66,7 +66,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <spring-boot-dependencies.version>3.4.0</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>3.4.1</spring-boot-dependencies.version>
     </properties>
 
     <dependencyManagement>

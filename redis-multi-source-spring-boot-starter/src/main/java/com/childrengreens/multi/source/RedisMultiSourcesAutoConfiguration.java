@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Import;
  */
 
 @AutoConfiguration(before = RedisAutoConfiguration.class)
-@Import({LettuceConnectionMultiSourcesRegistrar.class, RedisTemplateRegistryPostProcessor.class})
+@Import({RedisConnectionMultiSourcesRegistrar.class, RedisTemplateRegistryPostProcessor.class})
 public class RedisMultiSourcesAutoConfiguration {
 
 }
