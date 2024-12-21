@@ -84,7 +84,7 @@ public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRe
                         ObjectProvider<SslBundles> sslBundlesProvider = beanFactory.getBeanProvider(SslBundles.class);
 
                         try {
-                            String connectionConfigurationClassName = isJedisConnectionFactory ? lettuceConnectionConfigurationClassName : jedisConnectionConfigurationClassName;
+                            String connectionConfigurationClassName = isJedisConnectionFactory ? jedisConnectionConfigurationClassName : lettuceConnectionConfigurationClassName;
                             Class<?> clazz = ClassUtils.forName(connectionConfigurationClassName, ClassUtils.getDefaultClassLoader());
                             Constructor<?> constructor = clazz.getDeclaredConstructors()[0];
                             constructor.setAccessible(true);
