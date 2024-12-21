@@ -20,6 +20,16 @@ To use Redis multi-data sources, you need to add the Redis Multi Sources Spring 
     <version>2.2</version>
 </dependency>
 ----
+To use Jedis instead of Lettuce as the client, you need to add the following dependencies:
+[source, xml]
+----
+<dependency>
+    <groupId>redis.clients</groupId>
+    <artifactId>jedis</artifactId>
+</dependency>
+----
+
+
 Add the following configuration to your properties file.
 [source,properties]
 ----
@@ -34,6 +44,8 @@ spring.multi-sources.redis.source.cn.password=Asd12345!.
 # hk data source
 spring.multi-sources.redis.sources.hk.sentinel.master=hk-redis-master
 spring.multi-sources.redis.sources.hk.database=0
+# jedis client
+spring.multi-sources.redis.sources.hk.client-type=jedis
 spring.multi-sources.redis.sources.hk.password=Asd12345!.
 spring.multi-sources.redis.sources.hk.lettuce.pool.enabled=true
 spring.multi-sources.redis.sources.hk.sentinel.nodes[0]=192.168.1.1:26379
@@ -75,6 +87,8 @@ spring:
               - 192.168.1.2:26379
               - 192.168.1.2:26379
           database: 0
+          # jedis client
+          client-type: jedis
           password: Asd12345!.
           lettuce:
             pool:
@@ -92,7 +106,7 @@ spring:
           password: Asd12345!.
 ----
 === Redis Multi Source Runtime
-Redis Multi Sources Spring Boot Starter will create multiple sets of `LettuceConnectionFactory`, `RedisTemplate`, and `StringRedisTemplate` beans based on the configuration and register them in the Spring container.
+Redis Multi Sources Spring Boot Starter will create multiple sets of `LettuceConnectionFactory` or `JedisConnectionFactory`, `RedisTemplate`, and `StringRedisTemplate` beans based on the configuration and register them in the Spring container.
 
 The naming convention for the bean names is: `sourceName` + `className`. Therefore, the usage is as follows:
 [source,java]
@@ -109,6 +123,10 @@ private RedisTemplate<String, Object> redisTemplate;
 
 @Autowired
 @Qualifier("usLettuceConnectionFactory")
+private RedisConnectionFactory redisConnectionFactory;
+
+@Autowired
+@Qualifier("hkJedisConnectionFactory")
 private RedisConnectionFactory redisConnectionFactory;
 
 ----
