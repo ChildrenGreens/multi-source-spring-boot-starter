@@ -17,6 +17,7 @@
         <module>redis-multi-source-spring-boot-starter</module>
         <module>amqp-multi-source-spring-boot-starter</module>
         <module>context-multi-source-spring-boot-starter</module>
+        <module>influx2-multi-source-spring-boot-starter</module>
     </modules>
 
 
