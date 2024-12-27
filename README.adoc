@@ -17,7 +17,7 @@ To use Redis multi-data sources, you need to add the Redis Multi Sources Spring 
 <dependency>
     <groupId>com.childrengreens</groupId>
     <artifactId>redis-multi-source-spring-boot-starter</artifactId>
-    <version>2.2</version>
+    <version>2.3</version>
 </dependency>
 ----
 To use Jedis instead of Lettuce as the client, you need to add the following dependencies:
@@ -139,7 +139,7 @@ To use RabbitMQ multi-data sources, you need to add the AMQP Multi Sources Sprin
 <dependency>
     <groupId>com.childrengreens</groupId>
     <artifactId>amqp-multi-source-spring-boot-starter</artifactId>
-    <version>2.2</version>
+    <version>2.3</version>
 </dependency>
 ----
 Add the following configuration to your properties file.
@@ -209,6 +209,73 @@ private RabbitTemplate rabbitTemplate;
 @Autowired
 @Qualifier("hkSimpleRabbitListenerContainerFactory")
 private SimpleRabbitListenerContainerFactory simpleRabbitListenerContainerFactory;
+
+----
+
+
+=== InfluxDB2 Multi Data Sources
+To use InfluxDB2 multi-data sources, you need to add the Influx2 Multi Sources Spring Boot Starter dependency to your project.
+[source,xml]
+----
+<dependency>
+    <groupId>com.childrengreens</groupId>
+    <artifactId>influx2-multi-source-spring-boot-starter</artifactId>
+    <version>2.3</version>
+</dependency>
+----
+Add the following configuration to your properties file.
+[source,properties]
+----
+# set the primary-key data source (must)
+spring.multi-sources.influx.primary-key=cn
+
+# cn data source
+spring.multi-sources.influx.sources.cn.url=http://127.0.0.1:8086/
+spring.multi-sources.influx.sources.cn.token=wkOEKEVJ4jJBUhTwzKLsFVTpqR_JsGR3w6ybS3xTDy67WSaY14W4HQf59r69pX0YDaboNDRo_SrMa_T3clNMPA==
+spring.multi-sources.influx.sources.cn.org=cn-market-data
+spring.multi-sources.influx.sources.cn.bucket=cn-data
+
+# hk data source
+spring.multi-sources.influx.sources.hk.url=http://127.0.0.2:8086/
+spring.multi-sources.influx.sources.hk.token=wkOEKEVJ4jJBUhTwzKLsFVTpqR_JsGR3w6ybS3xTDy67WSaY14W4HQf59r69pX0YDaboNDRo_FkMa_T3clNMPA==
+spring.multi-sources.influx.sources.hk.org=hk-market-data
+spring.multi-sources.influx.sources.hk.bucket=hk-data
+
+----
+
+
+[source,yml]
+----
+# set the primary-key data source (must)
+spring:
+  multi-sources:
+    influx:
+      primary-key: cn
+
+      # cn data source
+      sources:
+        cn:
+          url: http://127.0.0.1:8086/
+          token: wkOEKEVJ4jJBUhTwzKLsFVTpqR_JsGR3w6ybS3xTDy67WSaY14W4HQf59r69pX0YDaboNDRo_SrMa_T3clNMPA==
+          org: cn-market-data
+          bucket: cn-data
+
+      # hk data source
+        hk:
+          url: http://127.0.0.2:8086/
+          token: wkOEKEVJ4jJBUhTwzKLsFVTpqR_JsGR3w6ybS3xTDy67WSaY14W4HQf59r69pX0YDaboNDRo_FkMa_T3clNMPA==
+          org: hk-market-data
+          bucket: hk-data
+----
+=== InfluxDB2 Multi Source Runtime
+Influx2 Multi Sources Spring Boot Starter will create multiple `InfluxDBClient` bean based on the configuration and register them in the Spring container.
+
+The naming convention for the bean names is: `sourceName` + `className`. Therefore, the usage is as follows:
+[source,java]
+----
+@Autowired
+@Qualifier("cnInfluxDBClient")
+private InfluxDBClient influxDBClient;
 
 ----
 
