@@ -62,7 +62,10 @@ public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRe
                     RedisConnectionDetails.class,
                     redisConnectionDetailsBeanName,
                     isPrimary,
-                    () -> (RedisConnectionDetails) newInstance(redisConnectionDetailsClassName, new Class[]{RedisProperties.class}, source));
+                    () -> {
+                        ObjectProvider<SslBundles> sslBundlesProvider = beanFactory.getBeanProvider(SslBundles.class);
+                        return (RedisConnectionDetails) newInstance(redisConnectionDetailsClassName, new Class[]{RedisProperties.class, SslBundles.class}, source, sslBundlesProvider.getIfAvailable());
+                    });
 
             // JedisConnectionFactory or LettuceConnectionFactory
             boolean isJedisConnectionFactory = Objects.nonNull(source.getClientType())
@@ -81,7 +84,6 @@ public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRe
                         ObjectProvider<RedisStandaloneConfiguration> standaloneProvider = beanFactory.getBeanProvider(RedisStandaloneConfiguration.class);
                         ObjectProvider<RedisSentinelConfiguration> sentinelProvider = beanFactory.getBeanProvider(RedisSentinelConfiguration.class);
                         ObjectProvider<RedisClusterConfiguration> clusterProvider = beanFactory.getBeanProvider(RedisClusterConfiguration.class);
-                        ObjectProvider<SslBundles> sslBundlesProvider = beanFactory.getBeanProvider(SslBundles.class);
 
                         try {
                             String connectionConfigurationClassName = isJedisConnectionFactory ? jedisConnectionConfigurationClassName : lettuceConnectionConfigurationClassName;
@@ -92,8 +94,7 @@ public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRe
                                     standaloneProvider,
                                     sentinelProvider,
                                     clusterProvider,
-                                    connectionDetails,
-                                    sslBundlesProvider);
+                                    connectionDetails);
 
 
                             if (isJedisConnectionFactory) {

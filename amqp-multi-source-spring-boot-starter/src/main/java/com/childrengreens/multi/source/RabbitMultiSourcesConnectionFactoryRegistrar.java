@@ -51,7 +51,10 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
                     RabbitConnectionDetails.class,
                     rabbitConnectionDetailsBeanName,
                     isPrimary,
-                    () -> (RabbitConnectionDetails) newInstance(rabbitConnectionDetailsClassName, new Class[]{RabbitProperties.class}, source));
+                    () -> {
+                        ObjectProvider<SslBundles> sslBundles = beanFactory.getBeanProvider(SslBundles.class);
+                        return (RabbitConnectionDetails) newInstance(rabbitConnectionDetailsClassName, new Class[]{RabbitProperties.class, SslBundles.class}, source, sslBundles.getIfAvailable());
+                    });
 
             // register RabbitConnectionFactoryBeanConfigurer
             String rabbitConnectionFactoryBeanConfigurerBeanName = generateBeanName(RabbitConnectionFactoryBeanConfigurer.class, name);
@@ -63,10 +66,9 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
                         RabbitConnectionDetails connectionDetails = beanFactory.getBean(rabbitConnectionDetailsBeanName, RabbitConnectionDetails.class);
                         ObjectProvider<CredentialsProvider> credentialsProvider = beanFactory.getBeanProvider(CredentialsProvider.class);
                         ObjectProvider<CredentialsRefreshService> credentialsRefreshService = beanFactory.getBeanProvider(CredentialsRefreshService.class);
-                        ObjectProvider<SslBundles> sslBundles = beanFactory.getBeanProvider(SslBundles.class);
 
                         RabbitConnectionFactoryBeanConfigurer configurer = new RabbitConnectionFactoryBeanConfigurer(resourceLoader,
-                                source, connectionDetails, sslBundles.getIfAvailable());
+                                source, connectionDetails);
                         configurer.setCredentialsProvider(credentialsProvider.getIfUnique());
                         configurer.setCredentialsRefreshService(credentialsRefreshService.getIfUnique());
                         return configurer;
@@ -80,10 +82,10 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
                     isPrimary,
                     () -> {
                         RabbitConnectionDetails rabbitConnectionDetails = beanFactory.getBean(rabbitConnectionDetailsBeanName, RabbitConnectionDetails.class);
-                        CachingConnectionFactoryConfigurer cachingConnectionFactoryConfigurer = new CachingConnectionFactoryConfigurer(source, rabbitConnectionDetails);
+                        CachingConnectionFactoryConfigurer configurer = new CachingConnectionFactoryConfigurer(source, rabbitConnectionDetails);
                         ObjectProvider<ConnectionNameStrategy> connectionNameStrategy = beanFactory.getBeanProvider(ConnectionNameStrategy.class);
-                        cachingConnectionFactoryConfigurer.setConnectionNameStrategy(connectionNameStrategy.getIfUnique());
-                        return cachingConnectionFactoryConfigurer;
+                        configurer.setConnectionNameStrategy(connectionNameStrategy.getIfUnique());
+                        return configurer;
                     });
 
             // register CachingConnectionFactory
