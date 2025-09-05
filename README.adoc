@@ -17,7 +17,7 @@ To use Redis multi-data sources, you need to add the Redis Multi Sources Spring 
 <dependency>
     <groupId>com.childrengreens</groupId>
     <artifactId>redis-multi-source-spring-boot-starter</artifactId>
-    <version>2.5</version>
+    <version>2.6</version>
 </dependency>
 ----
 To use Jedis instead of Lettuce as the client, you need to add the following dependencies:
@@ -139,7 +139,7 @@ To use RabbitMQ multi-data sources, you need to add the AMQP Multi Sources Sprin
 <dependency>
     <groupId>com.childrengreens</groupId>
     <artifactId>amqp-multi-source-spring-boot-starter</artifactId>
-    <version>2.5</version>
+    <version>2.6</version>
 </dependency>
 ----
 Add the following configuration to your properties file.
@@ -220,7 +220,7 @@ To use InfluxDB2 multi-data sources, you need to add the Influx2 Multi Sources S
 <dependency>
     <groupId>com.childrengreens</groupId>
     <artifactId>influx2-multi-source-spring-boot-starter</artifactId>
-    <version>2.5</version>
+    <version>2.6</version>
 </dependency>
 ----
 Add the following configuration to your properties file.
