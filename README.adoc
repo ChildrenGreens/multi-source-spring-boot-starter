@@ -1,4 +1,4 @@
-image:https://img.shields.io/badge/maven%20central-v3.0.1-blue.svg["Maven Central",link="https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22quickfixj-spring-boot-starter%22"]
+image:https://img.shields.io/maven-central/v/com.childrengreens/redis-multi-source-spring-boot-starter.svg["Maven Central",link="https://central.sonatype.com/artifact/com.childrengreens/redis-multi-source-spring-boot-starter"]
 image:https://img.shields.io/hexpm/l/plug.svg["Apache 2",link="http://www.apache.org/licenses/LICENSE-2.0"]
 
 
@@ -37,9 +37,9 @@ Add the following configuration to your properties file.
 spring.multi-sources.redis.primary-key=cn
 
 # cn data source
-spring.multi-sources.redis.source.cn.host=127.0.0.1
-spring.multi-sources.redis.source.cn.port=6379
-spring.multi-sources.redis.source.cn.password=Asd12345!.
+spring.multi-sources.redis.sources.cn.host=127.0.0.1
+spring.multi-sources.redis.sources.cn.port=6379
+spring.multi-sources.redis.sources.cn.password=Asd12345!.
 
 # hk data source
 spring.multi-sources.redis.sources.hk.sentinel.master=hk-redis-master
@@ -69,15 +69,15 @@ spring:
       # set the primary-key data source (must)
       primary-key: cn
 
-      # cn data source
-      source:
+      # data sources
+      sources:
+        # cn data source
         cn:
           host: 127.0.0.1
           port: 6379
           password: Asd12345!.
 
-      # hk data source
-      sources:
+        # hk data source
         hk:
           sentinel:
             master: hk-redis-master
