@@ -1,17 +1,45 @@
 image:https://img.shields.io/maven-central/v/com.childrengreens/redis-multi-source-spring-boot-starter.svg["Maven Central",link="https://central.sonatype.com/artifact/com.childrengreens/redis-multi-source-spring-boot-starter"]
 image:https://img.shields.io/hexpm/l/plug.svg["Apache 2",link="http://www.apache.org/licenses/LICENSE-2.0"]
 
-
 = Spring Boot Starter for Multi Data Source (Spring Boot 3)
 
-This project is a multi-datasource auto-configuration project based on https://spring.io/projects/spring-boot/[Spring Boot Starter].
-It simplifies the complex process of creating multiple data sources, requiring only configuration of properties, just like in a typical Spring Boot project.
+Production-ready Spring Boot starters that make it easy to configure and consume multiple Redis, RabbitMQ, and InfluxDB 2.x connections in a single application.
 
+== Overview
 
-== Getting started
+The starters wrap Spring Boot auto-configuration patterns and expose a consistent properties model under the `spring.multi-sources.*` namespace. Each data source you define results in a dedicated set of Spring beans so you can connect to many back-ends without duplicating configuration code.
 
-=== Redis Multi Data Sources
-To use Redis multi-data sources, you need to add the Redis Multi Sources Spring Boot Starter dependency to your project.
+== Highlights
+
+* Manage multiple Redis, RabbitMQ, and InfluxDB 2.x connections using pure configuration.
+* Deterministic bean naming (`<sourceName><ClassSimpleName>`) keeps injection explicit and type-safe.
+* Built on Spring Boot 3.4.x and Java 17 with familiar `@ConfigurationProperties` support.
+
+== Requirements
+
+* Java 17+
+* Spring Boot 3.4.x (pulled in via the parent BOM)
+* One or more of the supported back-end clients (Lettuce or Jedis for Redis, Spring AMQP, InfluxDB Java client)
+
+== Modules
+
+[cols="1,1,2",options="header"]
+|===
+| Module | Maven coordinates | Purpose
+| `redis-multi-source-spring-boot-starter` | `com.childrengreens:redis-multi-source-spring-boot-starter` | Configure multiple Redis data sources backed by Lettuce or Jedis.
+| `amqp-multi-source-spring-boot-starter` | `com.childrengreens:amqp-multi-source-spring-boot-starter` | Manage multiple RabbitMQ connections and messaging infrastructure.
+| `influx2-multi-source-spring-boot-starter` | `com.childrengreens:influx2-multi-source-spring-boot-starter` | Connect to multiple InfluxDB 2.x organizations/buckets.
+| `context-multi-source-spring-boot-starter` | Internal support module that contributes shared infrastructure (no direct usage required).
+|===
+
+== Quick Start
+
+. Add the starter(s) you need to your project.
+. Configure `spring.multi-sources.<type>` properties for each connection, including a mandatory `primary-key`.
+. Inject the generated beans using `@Qualifier` and the `<sourceName><ClassSimpleName>` naming scheme.
+
+=== Dependency example
+
 [source,xml]
 ----
 <dependency>
@@ -20,8 +48,10 @@ To use Redis multi-data sources, you need to add the Redis Multi Sources Spring 
     <version>2.6</version>
 </dependency>
 ----
-To use Jedis instead of Lettuce as the client, you need to add the following dependencies:
-[source, xml]
+
+Need Jedis instead of Lettuce? Add the client to your project:
+
+[source,xml]
 ----
 <dependency>
     <groupId>redis.clients</groupId>
@@ -29,256 +59,181 @@ To use Jedis instead of Lettuce as the client, you need to add the following dep
 </dependency>
 ----
 
+== Configuration Reference
 
-Add the following configuration to your properties file.
+=== Redis multi data sources
+
+At minimum specify a `primary-key` and one or more entries under `sources`. Each source can target standalone, sentinel, or cluster deployments.
+
 [source,properties]
 ----
-# set the primary-key data source (must)
+# required default source
 spring.multi-sources.redis.primary-key=cn
 
-# cn data source
+# standalone example
 spring.multi-sources.redis.sources.cn.host=127.0.0.1
 spring.multi-sources.redis.sources.cn.port=6379
-spring.multi-sources.redis.sources.cn.password=Asd12345!.
+spring.multi-sources.redis.sources.cn.password=changeme
 
-# hk data source
+# sentinel example
 spring.multi-sources.redis.sources.hk.sentinel.master=hk-redis-master
-spring.multi-sources.redis.sources.hk.database=0
-# jedis client
-spring.multi-sources.redis.sources.hk.client-type=jedis
-spring.multi-sources.redis.sources.hk.password=Asd12345!.
-spring.multi-sources.redis.sources.hk.lettuce.pool.enabled=true
 spring.multi-sources.redis.sources.hk.sentinel.nodes[0]=192.168.1.1:26379
 spring.multi-sources.redis.sources.hk.sentinel.nodes[1]=192.168.1.2:26379
-spring.multi-sources.redis.sources.hk.sentinel.nodes[2]=192.168.1.2:26379
+spring.multi-sources.redis.sources.hk.database=0
+spring.multi-sources.redis.sources.hk.client-type=jedis
+spring.multi-sources.redis.sources.hk.password=changeme
+spring.multi-sources.redis.sources.hk.lettuce.pool.enabled=true
 
-# us data source
+# cluster example
 spring.multi-sources.redis.sources.us.cluster.nodes[0]=127.0.0.1:6379
 spring.multi-sources.redis.sources.us.cluster.nodes[1]=127.0.0.1:6380
 spring.multi-sources.redis.sources.us.cluster.nodes[2]=127.0.0.1:6381
 spring.multi-sources.redis.sources.us.cluster.max-redirects=3
-spring.multi-sources.redis.sources.us.password=Asd12345!.
+spring.multi-sources.redis.sources.us.password=changeme
 ----
-
 
 [source,yml]
 ----
 spring:
   multi-sources:
     redis:
-      # set the primary-key data source (must)
       primary-key: cn
-
-      # data sources
       sources:
-        # cn data source
         cn:
           host: 127.0.0.1
           port: 6379
-          password: Asd12345!.
-
-        # hk data source
+          password: changeme
         hk:
+          client-type: jedis
+          password: changeme
           sentinel:
             master: hk-redis-master
-            # Sentinel nodes
             nodes:
               - 192.168.1.1:26379
               - 192.168.1.2:26379
-              - 192.168.1.2:26379
           database: 0
-          # jedis client
-          client-type: jedis
-          password: Asd12345!.
           lettuce:
             pool:
               enabled: true
-
-        # us data source
         us:
+          password: changeme
           cluster:
-            # Cluster nodes
             nodes:
               - 127.0.0.1:6379
               - 127.0.0.1:6380
               - 127.0.0.1:6381
             max-redirects: 3
-          password: Asd12345!.
-----
-=== Redis Multi Source Runtime
-Redis Multi Sources Spring Boot Starter will create multiple sets of `LettuceConnectionFactory` or `JedisConnectionFactory`, `RedisTemplate`, and `StringRedisTemplate` beans based on the configuration and register them in the Spring container.
-
-The naming convention for the bean names is: `sourceName` + `className`. Therefore, the usage is as follows:
-[source,java]
-----
-@Autowired
-@Qualifier("cnStringRedisTemplate")
-private StringRedisTemplate stringRedisTemplate;
-
-
-@Autowired
-@Qualifier("hkRedisTemplate")
-private RedisTemplate<String, Object> redisTemplate;
-
-
-@Autowired
-@Qualifier("usLettuceConnectionFactory")
-private RedisConnectionFactory redisConnectionFactory;
-
-@Autowired
-@Qualifier("hkJedisConnectionFactory")
-private RedisConnectionFactory redisConnectionFactory;
-
 ----
 
+The starter registers `LettuceConnectionFactory` or `JedisConnectionFactory`, `RedisTemplate`, and `StringRedisTemplate` per source.
 
-=== RabbitMQ Multi Data Sources
-To use RabbitMQ multi-data sources, you need to add the AMQP Multi Sources Spring Boot Starter dependency to your project.
-[source,xml]
-----
-<dependency>
-    <groupId>com.childrengreens</groupId>
-    <artifactId>amqp-multi-source-spring-boot-starter</artifactId>
-    <version>2.6</version>
-</dependency>
-----
-Add the following configuration to your properties file.
+=== RabbitMQ multi data sources
+
 [source,properties]
 ----
-# set the primary-key data source (must)
 spring.multi-sources.rabbitmq.primary-key=cn
 
-# cn data source
-spring.multi-sources.rabbitmq.sources.cn.port=5672
 spring.multi-sources.rabbitmq.sources.cn.host=192.168.1.1
+spring.multi-sources.rabbitmq.sources.cn.port=5672
 spring.multi-sources.rabbitmq.sources.cn.username=guest
 spring.multi-sources.rabbitmq.sources.cn.password=guest
 spring.multi-sources.rabbitmq.sources.cn.virtual-host=/
 
-# hk data source
-spring.multi-sources.rabbitmq.sources.hk.port=5672
 spring.multi-sources.rabbitmq.sources.hk.host=192.168.1.2
+spring.multi-sources.rabbitmq.sources.hk.port=5672
 spring.multi-sources.rabbitmq.sources.hk.username=guest
 spring.multi-sources.rabbitmq.sources.hk.password=guest
 spring.multi-sources.rabbitmq.sources.hk.virtual-host=/
-
 ----
-
 
 [source,yml]
 ----
-# set the primary-key data source (must)
 spring:
   multi-sources:
     rabbitmq:
       primary-key: cn
-
-      # cn data source
       sources:
         cn:
-          port: 5672
           host: 192.168.1.1
-          username: guest
-          password: guest
-          virtual-host: /
-
-      # hk data source
-        hk:
           port: 5672
+          username: guest
+          password: guest
+          virtual-host: /
+        hk:
           host: 192.168.1.2
+          port: 5672
           username: guest
           password: guest
           virtual-host: /
 ----
-=== RabbitMQ Multi Source Runtime
-AMQP Multi Sources Spring Boot Starter will create multiple sets of `CachingConnectionFactory`, `SimpleRabbitListenerContainerFactory`, `RabbitTemplate`, and `RabbitMessagingTemplate` beans based on the configuration and register them in the Spring container.
 
-The naming convention for the bean names is: `sourceName` + `className`. Therefore, the usage is as follows:
-[source,java]
-----
-@Autowired
-@Qualifier("cnCachingConnectionFactory")
-private CachingConnectionFactory cachingConnectionFactory;
+The starter provisions `CachingConnectionFactory`, `RabbitTemplate`, `RabbitMessagingTemplate`, and `SimpleRabbitListenerContainerFactory` beans per source.
 
+=== InfluxDB 2.x multi data sources
 
-@Autowired
-@Qualifier("hkRabbitTemplate")
-private RabbitTemplate rabbitTemplate;
-
-
-@Autowired
-@Qualifier("hkSimpleRabbitListenerContainerFactory")
-private SimpleRabbitListenerContainerFactory simpleRabbitListenerContainerFactory;
-
-----
-
-
-=== InfluxDB2 Multi Data Sources
-To use InfluxDB2 multi-data sources, you need to add the Influx2 Multi Sources Spring Boot Starter dependency to your project.
-[source,xml]
-----
-<dependency>
-    <groupId>com.childrengreens</groupId>
-    <artifactId>influx2-multi-source-spring-boot-starter</artifactId>
-    <version>2.6</version>
-</dependency>
-----
-Add the following configuration to your properties file.
 [source,properties]
 ----
-# set the primary-key data source (must)
 spring.multi-sources.influx.primary-key=cn
 
-# cn data source
 spring.multi-sources.influx.sources.cn.url=http://127.0.0.1:8086/
-spring.multi-sources.influx.sources.cn.token=wkOEKEVJ4jJBUhTwzKLsFVTpqR_JsGR3w6ybS3xTDy67WSaY14W4HQf59r69pX0YDaboNDRo_SrMa_T3clNMPA==
+spring.multi-sources.influx.sources.cn.token=CHANGEME
 spring.multi-sources.influx.sources.cn.org=cn-market-data
 spring.multi-sources.influx.sources.cn.bucket=cn-data
 
-# hk data source
 spring.multi-sources.influx.sources.hk.url=http://127.0.0.2:8086/
-spring.multi-sources.influx.sources.hk.token=wkOEKEVJ4jJBUhTwzKLsFVTpqR_JsGR3w6ybS3xTDy67WSaY14W4HQf59r69pX0YDaboNDRo_FkMa_T3clNMPA==
+spring.multi-sources.influx.sources.hk.token=CHANGEME
 spring.multi-sources.influx.sources.hk.org=hk-market-data
 spring.multi-sources.influx.sources.hk.bucket=hk-data
-
 ----
-
 
 [source,yml]
 ----
-# set the primary-key data source (must)
 spring:
   multi-sources:
     influx:
       primary-key: cn
-
-      # cn data source
       sources:
         cn:
           url: http://127.0.0.1:8086/
-          token: wkOEKEVJ4jJBUhTwzKLsFVTpqR_JsGR3w6ybS3xTDy67WSaY14W4HQf59r69pX0YDaboNDRo_SrMa_T3clNMPA==
+          token: CHANGEME
           org: cn-market-data
           bucket: cn-data
-
-      # hk data source
         hk:
           url: http://127.0.0.2:8086/
-          token: wkOEKEVJ4jJBUhTwzKLsFVTpqR_JsGR3w6ybS3xTDy67WSaY14W4HQf59r69pX0YDaboNDRo_FkMa_T3clNMPA==
+          token: CHANGEME
           org: hk-market-data
           bucket: hk-data
 ----
-=== InfluxDB2 Multi Source Runtime
-Influx2 Multi Sources Spring Boot Starter will create multiple `InfluxDBClient` bean based on the configuration and register them in the Spring container.
 
-The naming convention for the bean names is: `sourceName` + `className`. Therefore, the usage is as follows:
+Each configured source exposes an `InfluxDBClient` bean.
+
+== Bean naming strategy
+
+Beans follow the `<sourceName><ClassSimpleName>` pattern. A source named `cn` produces beans such as `cnStringRedisTemplate`, `cnCachingConnectionFactory`, or `cnInfluxDBClient`. Inject them explicitly with `@Qualifier`:
+
 [source,java]
 ----
 @Autowired
-@Qualifier("cnInfluxDBClient")
-private InfluxDBClient influxDBClient;
+@Qualifier("hkRedisTemplate")
+private RedisTemplate<String, Object> hkRedisTemplate;
 
+@Autowired
+@Qualifier("usLettuceConnectionFactory")
+private RedisConnectionFactory usConnectionFactory;
+
+@Autowired
+@Qualifier("cnCachingConnectionFactory")
+private CachingConnectionFactory cnRabbitConnectionFactory;
+
+@Autowired
+@Qualifier("hkInfluxDBClient")
+private InfluxDBClient hkInfluxClient;
 ----
+
+== Validation & builds
+
+Run `mvn validate` to apply license headers and `mvn clean install` to build all modules. Individual modules can be built with `mvn -pl <module> -am package`.
 
 == License
 
-Spring Boot is Open Source software released under the https://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 license].
+Spring Boot Multi Source Starters are released under the https://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 license].
