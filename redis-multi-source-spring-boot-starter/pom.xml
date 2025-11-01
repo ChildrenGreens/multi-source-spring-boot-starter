@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.childrengreens</groupId>
         <artifactId>multi-source-spring-boot-starter</artifactId>
-        <version>2.7-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>redis-multi-source-spring-boot-starter</artifactId>
@@ -37,7 +37,6 @@
         <dependency>
             <groupId>com.childrengreens</groupId>
             <artifactId>context-multi-source-spring-boot-starter</artifactId>
-            <version>2.7-SNAPSHOT</version>
         </dependency>
 
         <dependency>
