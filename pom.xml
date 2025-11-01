@@ -83,22 +83,22 @@
             <dependency>
                 <groupId>com.childrengreens</groupId>
                 <artifactId>context-multi-source-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.childrengreens</groupId>
                 <artifactId>redis-multi-source-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.childrengreens</groupId>
                 <artifactId>amqp-multi-source-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.childrengreens</groupId>
                 <artifactId>influx2-multi-source-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
