@@ -29,7 +29,7 @@ The starters wrap Spring Boot auto-configuration patterns and expose a consisten
 | `redis-multi-source-spring-boot-starter` | `com.childrengreens:redis-multi-source-spring-boot-starter` | Configure multiple Redis data sources backed by Lettuce or Jedis.
 | `amqp-multi-source-spring-boot-starter` | `com.childrengreens:amqp-multi-source-spring-boot-starter` | Manage multiple RabbitMQ connections and messaging infrastructure.
 | `influx2-multi-source-spring-boot-starter` | `com.childrengreens:influx2-multi-source-spring-boot-starter` | Connect to multiple InfluxDB 2.x organizations/buckets.
-| `context-multi-source-spring-boot-starter` | Internal support module that contributes shared infrastructure (no direct usage required).
+| `context-multi-source-spring-boot-starter` | `com.childrengreens:context-multi-source-spring-boot-starter` | Internal support module that contributes shared infrastructure (no direct usage required).
 |===
 
 == Quick Start
