@@ -45,7 +45,7 @@ The starters wrap Spring Boot auto-configuration patterns and expose a consisten
 <dependency>
     <groupId>com.childrengreens</groupId>
     <artifactId>redis-multi-source-spring-boot-starter</artifactId>
-    <version>2.6</version>
+    <version>${latest-version}</version>
 </dependency>
 ----
 
