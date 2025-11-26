@@ -18,6 +18,7 @@ package com.childrengreens.multi.source;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -26,6 +27,7 @@ import org.springframework.context.annotation.Import;
  * @author ChildrenGreens
  */
 @AutoConfiguration(before = RabbitAutoConfiguration.class)
+@ImportRuntimeHints(RabbitMultiSourcesRuntimeHints.class)
 @Import({RabbitMultiSourcesConnectionFactoryRegistrar.class, RabbitMultiSourcesTemplateRegistrar.class, RabbitMultiSourcesAnnotationDrivenRegistrar.class})
 public class RabbitMultiSourcesAutoConfiguration {
 }

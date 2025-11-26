@@ -1,5 +1,8 @@
 # Repository Guidelines
 
+## Communication
+- Default to replying in Chinese unless the user explicitly asks for another language.
+
 ## Project Structure & Module Organization
 - Modules: `redis-*/`, `amqp-*/`, `influx2-*/`, `context-*/` (multi-module Maven).
 - Source: `<module>/src/main/java`, resources in `<module>/src/main/resources`.
@@ -37,4 +40,3 @@
 - Implement a registrar by extending `AbstractMultiSourcesRegistrar` and an `@AutoConfiguration` that `@Import`s it.
 - Register auto-config in `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`.
 - Document new properties and bean naming examples in `README.adoc`.
-

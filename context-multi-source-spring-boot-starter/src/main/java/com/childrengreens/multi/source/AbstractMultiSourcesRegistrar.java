@@ -116,7 +116,8 @@ public abstract class AbstractMultiSourcesRegistrar<D> implements ImportBeanDefi
     protected Object newInstance(String className, Class<?>[] parameterTypes, Object... args) {
         try {
             Class<?> clazz = ClassUtils.forName(className, ClassUtils.getDefaultClassLoader());
-            Constructor<?> declaredConstructor = clazz.getDeclaredConstructor(parameterTypes);
+            Class<?>[] resolvedParameterTypes = (parameterTypes != null ? parameterTypes : new Class<?>[0]);
+            Constructor<?> declaredConstructor = clazz.getDeclaredConstructor(resolvedParameterTypes);
             declaredConstructor.setAccessible(true);
             return declaredConstructor.newInstance(args);
         } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException | InstantiationException |
