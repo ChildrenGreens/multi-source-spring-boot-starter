@@ -24,10 +24,10 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
-import org.springframework.boot.autoconfigure.amqp.RabbitRetryTemplateCustomizer;
-import org.springframework.boot.autoconfigure.amqp.RabbitTemplateConfigurer;
-import org.springframework.boot.autoconfigure.amqp.RabbitTemplateCustomizer;
+import org.springframework.boot.amqp.autoconfigure.RabbitProperties;
+import org.springframework.boot.amqp.autoconfigure.RabbitTemplateRetrySettingsCustomizer;
+import org.springframework.boot.amqp.autoconfigure.RabbitTemplateConfigurer;
+import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
 
 /**
  * RabbitMQ multi-data-source template BeanDefinition registrar.
@@ -48,11 +48,11 @@ public class RabbitMultiSourcesTemplateRegistrar extends AbstractRabbitMultiSour
                     isPrimary,
                     ()-> {
                         ObjectProvider<MessageConverter> messageConverter = beanFactory.getBeanProvider(MessageConverter.class);
-                        ObjectProvider<RabbitRetryTemplateCustomizer> retryTemplateCustomizers = beanFactory.getBeanProvider(RabbitRetryTemplateCustomizer.class);
+                        ObjectProvider<RabbitTemplateRetrySettingsCustomizer> retryTemplateCustomizers = beanFactory.getBeanProvider(RabbitTemplateRetrySettingsCustomizer.class);
 
                         RabbitTemplateConfigurer configurer = new RabbitTemplateConfigurer(source);
                         configurer.setMessageConverter(messageConverter.getIfAvailable());
-                        configurer.setRetryTemplateCustomizers(retryTemplateCustomizers.orderedStream().toList());
+                        configurer.setRetrySettingsCustomizers(retryTemplateCustomizers.orderedStream().toList());
                         return configurer;
                     });
 

@@ -19,13 +19,10 @@ import io.lettuce.core.resource.ClientResources;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.autoconfigure.data.redis.*;
+import org.springframework.boot.data.redis.autoconfigure.*;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.data.redis.connection.RedisClusterConfiguration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisSentinelConfiguration;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.*;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.util.ClassUtils;
@@ -36,40 +33,40 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * Dynamically create multiple {@link RedisConnectionDetails} and {@link LettuceConnectionFactory} or {@link JedisConnectionFactory} based on Environment.
+ * Dynamically create multiple {@link DataRedisConnectionDetails} and {@link LettuceConnectionFactory} or {@link JedisConnectionFactory} based on Environment.
  *
  * @author ChildrenGreens
  */
-public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRegistrar<RedisProperties> {
+public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRegistrar<DataRedisProperties> {
 
 
-    private static final String redisConnectionDetailsClassName = "org.springframework.boot.autoconfigure.data.redis.PropertiesRedisConnectionDetails";
+    private static final String redisConnectionDetailsClassName = "org.springframework.boot.data.redis.autoconfigure.PropertiesDataRedisConnectionDetails";
 
-    private static final String lettuceConnectionConfigurationClassName = "org.springframework.boot.autoconfigure.data.redis.LettuceConnectionConfiguration";
+    private static final String lettuceConnectionConfigurationClassName = "org.springframework.boot.data.redis.autoconfigure.LettuceConnectionConfiguration";
 
-    private static final String jedisConnectionConfigurationClassName = "org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration";
+    private static final String jedisConnectionConfigurationClassName = "org.springframework.boot.data.redis.autoconfigure.JedisConnectionConfiguration";
 
     private static final boolean JEDIS_AVAILABLE = ClassUtils.isPresent("redis.clients.jedis.Jedis", ClassUtils.getDefaultClassLoader());
 
 
     @Override
-    void registerBeanDefinitionsForSource(String name, RedisProperties source, BeanDefinitionRegistry registry, Boolean isPrimary) {
+    void registerBeanDefinitionsForSource(String name, DataRedisProperties source, BeanDefinitionRegistry registry, Boolean isPrimary) {
 
         if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
-            // register PropertiesRedisConnectionDetails
+            // register PropertiesDataRedisConnectionDetails
             String redisConnectionDetailsBeanName = generateBeanName(redisConnectionDetailsClassName, name);
             registerBeanDefinition(registry,
-                    RedisConnectionDetails.class,
+                    DataRedisConnectionDetails.class,
                     redisConnectionDetailsBeanName,
                     isPrimary,
                     () -> {
                         ObjectProvider<SslBundles> sslBundlesProvider = beanFactory.getBeanProvider(SslBundles.class);
-                        return (RedisConnectionDetails) newInstance(redisConnectionDetailsClassName, new Class[]{RedisProperties.class, SslBundles.class}, source, sslBundlesProvider.getIfAvailable());
+                        return (DataRedisConnectionDetails) newInstance(redisConnectionDetailsClassName, new Class[]{DataRedisProperties.class, SslBundles.class}, source, sslBundlesProvider.getIfAvailable());
                     });
 
             // JedisConnectionFactory or LettuceConnectionFactory
             boolean isJedisConnectionFactory = Objects.nonNull(source.getClientType())
-                    && source.getClientType() == RedisProperties.ClientType.JEDIS
+                    && source.getClientType() == DataRedisProperties.ClientType.JEDIS
                     && JEDIS_AVAILABLE;
             Class<? extends RedisConnectionFactory> redisConnectionFactory = isJedisConnectionFactory ? JedisConnectionFactory.class : LettuceConnectionFactory.class;
 
@@ -80,10 +77,11 @@ public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRe
                     isPrimary,
                     () -> {
                         // new JedisConnectionFactory or LettuceConnectionFactory
-                        RedisConnectionDetails connectionDetails = beanFactory.getBean(redisConnectionDetailsBeanName, RedisConnectionDetails.class);
+                        DataRedisConnectionDetails connectionDetails = beanFactory.getBean(redisConnectionDetailsBeanName, DataRedisConnectionDetails.class);
                         ObjectProvider<RedisStandaloneConfiguration> standaloneProvider = beanFactory.getBeanProvider(RedisStandaloneConfiguration.class);
                         ObjectProvider<RedisSentinelConfiguration> sentinelProvider = beanFactory.getBeanProvider(RedisSentinelConfiguration.class);
                         ObjectProvider<RedisClusterConfiguration> clusterProvider = beanFactory.getBeanProvider(RedisClusterConfiguration.class);
+                        ObjectProvider<RedisStaticMasterReplicaConfiguration> masterReplicaProvider = beanFactory.getBeanProvider(RedisStaticMasterReplicaConfiguration.class);
 
                         try {
                             String connectionConfigurationClassName = isJedisConnectionFactory ? jedisConnectionConfigurationClassName : lettuceConnectionConfigurationClassName;
@@ -94,6 +92,7 @@ public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRe
                                     standaloneProvider,
                                     sentinelProvider,
                                     clusterProvider,
+                                    masterReplicaProvider,
                                     connectionDetails);
 
 
@@ -136,7 +135,7 @@ public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRe
     }
 
     @Override
-    Class<? extends MultiSourcesProperties<RedisProperties>> getMultiSourcesPropertiesClass() {
+    Class<? extends MultiSourcesProperties<DataRedisProperties>> getMultiSourcesPropertiesClass() {
         return RedisMultiSourcesProperties.class;
     }
 

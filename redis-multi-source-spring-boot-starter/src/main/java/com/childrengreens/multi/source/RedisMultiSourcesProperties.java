@@ -15,8 +15,8 @@
  */
 package com.childrengreens.multi.source;
 
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 
 /**
  * Configuration properties for multi data source Redis.
@@ -24,7 +24,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author ChildrenGreens
  */
 @ConfigurationProperties(prefix = "spring.multi-sources.redis")
-public class RedisMultiSourcesProperties extends MultiSourcesProperties<RedisProperties> {
+public class RedisMultiSourcesProperties extends MultiSourcesProperties<DataRedisProperties> {
 
 
 }

@@ -17,7 +17,7 @@ package com.childrengreens.multi.source;
 
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
+import org.springframework.boot.amqp.autoconfigure.RabbitProperties;
 
 import java.util.Objects;
 

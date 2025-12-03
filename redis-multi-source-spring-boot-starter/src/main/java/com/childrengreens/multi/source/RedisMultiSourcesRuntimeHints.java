@@ -20,8 +20,8 @@ import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.data.redis.RedisConnectionDetails;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisConnectionDetails;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.util.ClassUtils;
 
@@ -36,9 +36,9 @@ import java.lang.reflect.Method;
 public class RedisMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
 
     private static final String JEDIS_TYPE = "redis.clients.jedis.Jedis";
-    private static final String PROPERTIES_REDIS_CONNECTION_DETAILS = "org.springframework.boot.autoconfigure.data.redis.PropertiesRedisConnectionDetails";
-    private static final String LETTUCE_CONNECTION_CONFIGURATION = "org.springframework.boot.autoconfigure.data.redis.LettuceConnectionConfiguration";
-    private static final String JEDIS_CONNECTION_CONFIGURATION = "org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration";
+    private static final String PROPERTIES_REDIS_CONNECTION_DETAILS = "org.springframework.boot.data.redis.autoconfigure.PropertiesDataRedisConnectionDetails";
+    private static final String LETTUCE_CONNECTION_CONFIGURATION = "org.springframework.boot.data.redis.autoconfigure.LettuceConnectionConfiguration";
+    private static final String JEDIS_CONNECTION_CONFIGURATION = "org.springframework.boot.data.redis.autoconfigure.JedisConnectionConfiguration";
 
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
@@ -52,7 +52,7 @@ public class RedisMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
     private void registerConnectionDetails(RuntimeHints hints, ClassLoader classLoader) {
         try {
             Class<?> connectionDetails = resolveClass(PROPERTIES_REDIS_CONNECTION_DETAILS, classLoader);
-            Constructor<?> constructor = connectionDetails.getDeclaredConstructor(RedisProperties.class, SslBundles.class);
+            Constructor<?> constructor = connectionDetails.getDeclaredConstructor(DataRedisProperties.class, SslBundles.class);
             hints.reflection().registerConstructor(constructor, ExecutableMode.INVOKE);
         } catch (NoSuchMethodException ex) {
             throw new IllegalStateException("Failed to register Redis connection details constructor hint", ex);
@@ -63,8 +63,8 @@ public class RedisMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
         try {
             Class<?> configuration = resolveClass(LETTUCE_CONNECTION_CONFIGURATION, classLoader);
             Constructor<?> constructor = configuration
-                    .getDeclaredConstructor(RedisProperties.class, ObjectProvider.class, ObjectProvider.class,
-                            ObjectProvider.class, RedisConnectionDetails.class);
+                    .getDeclaredConstructor(DataRedisProperties.class, ObjectProvider.class, ObjectProvider.class,
+                            ObjectProvider.class, ObjectProvider.class, DataRedisConnectionDetails.class);
             hints.reflection().registerConstructor(constructor, ExecutableMode.INVOKE);
             Method createConnectionFactory = configuration.getDeclaredMethod("createConnectionFactory",
                     ObjectProvider.class, ObjectProvider.class, ClientResources.class);
@@ -78,8 +78,8 @@ public class RedisMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
         try {
             Class<?> configuration = resolveClass(JEDIS_CONNECTION_CONFIGURATION, classLoader);
             Constructor<?> constructor = configuration
-                    .getDeclaredConstructor(RedisProperties.class, ObjectProvider.class, ObjectProvider.class,
-                            ObjectProvider.class, RedisConnectionDetails.class);
+                    .getDeclaredConstructor(DataRedisProperties.class, ObjectProvider.class, ObjectProvider.class,
+                            ObjectProvider.class, ObjectProvider.class, DataRedisConnectionDetails.class);
             hints.reflection().registerConstructor(constructor, ExecutableMode.INVOKE);
             Method createConnectionFactory = configuration.getDeclaredMethod("createJedisConnectionFactory",
                     ObjectProvider.class);

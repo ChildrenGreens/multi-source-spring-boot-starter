@@ -15,7 +15,7 @@
  */
 package com.childrengreens.multi.source;
 
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
+import org.springframework.boot.amqp.autoconfigure.RabbitProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**

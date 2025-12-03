@@ -17,7 +17,7 @@ package com.childrengreens.multi.source;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -29,7 +29,7 @@ class RedisMultiSourcesAutoConfigurationTests {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(
-                    RedisAutoConfiguration.class,
+                    DataRedisAutoConfiguration.class,
                     RedisMultiSourcesAutoConfiguration.class
             ))
             .withPropertyValues(

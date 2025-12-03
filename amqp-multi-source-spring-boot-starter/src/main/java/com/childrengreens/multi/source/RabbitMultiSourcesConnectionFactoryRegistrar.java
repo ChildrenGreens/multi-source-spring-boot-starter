@@ -24,7 +24,7 @@ import org.springframework.amqp.rabbit.connection.RabbitConnectionFactoryBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.autoconfigure.amqp.*;
+import org.springframework.boot.amqp.autoconfigure.*;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
@@ -37,9 +37,9 @@ import org.springframework.core.io.ResourceLoader;
 public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbitMultiSourcesRegistrar implements ResourceLoaderAware {
     private ResourceLoader resourceLoader;
 
-    private static final String rabbitConnectionDetailsClassName = "org.springframework.boot.autoconfigure.amqp.PropertiesRabbitConnectionDetails";
+    private static final String rabbitConnectionDetailsClassName = "org.springframework.boot.amqp.autoconfigure.PropertiesRabbitConnectionDetails";
 
-    private static final String sslBundleRabbitConnectionFactoryBeanClassName = "org.springframework.boot.autoconfigure.amqp.SslBundleRabbitConnectionFactoryBean";
+    private static final String sslBundleRabbitConnectionFactoryBeanClassName = "org.springframework.boot.amqp.autoconfigure.SslBundleRabbitConnectionFactoryBean";
 
     @Override
     void registerBeanDefinitionsForSource(String name, RabbitProperties source, BeanDefinitionRegistry registry, Boolean isPrimary) {

@@ -24,9 +24,9 @@ import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.autoconfigure.amqp.DirectRabbitListenerContainerFactoryConfigurer;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
-import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
+import org.springframework.boot.amqp.autoconfigure.DirectRabbitListenerContainerFactoryConfigurer;
+import org.springframework.boot.amqp.autoconfigure.RabbitProperties;
+import org.springframework.boot.amqp.autoconfigure.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
@@ -42,7 +42,7 @@ import java.lang.reflect.Method;
  */
 public class RabbitMultiSourcesAnnotationDrivenRegistrar extends AbstractRabbitMultiSourcesRegistrar {
 
-    private static final String rabbitAnnotationDrivenConfigurationClassName = "org.springframework.boot.autoconfigure.amqp.RabbitAnnotationDrivenConfiguration";
+    private static final String rabbitAnnotationDrivenConfigurationClassName = "org.springframework.boot.amqp.autoconfigure.RabbitAnnotationDrivenConfiguration";
 
 
     @Override

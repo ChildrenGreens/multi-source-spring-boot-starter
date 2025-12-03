@@ -17,7 +17,7 @@ package com.childrengreens.multi.source;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.annotation.Import;
 
@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Import;
  * @author ChildrenGreens
  */
 
-@AutoConfiguration(before = RedisAutoConfiguration.class)
+@AutoConfiguration(before = DataRedisAutoConfiguration.class)
 @ImportRuntimeHints(RedisMultiSourcesRuntimeHints.class)
 @Import({RedisConnectionMultiSourcesRegistrar.class, RedisTemplateRegistryPostProcessor.class})
 public class RedisMultiSourcesAutoConfiguration {

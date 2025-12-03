@@ -18,7 +18,7 @@ package com.childrengreens.multi.source;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
+import org.springframework.boot.amqp.autoconfigure.RabbitProperties;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.util.ClassUtils;
 
@@ -32,9 +32,9 @@ import java.lang.reflect.Method;
  */
 public class RabbitMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
 
-    private static final String PROPERTIES_RABBIT_CONNECTION_DETAILS = "org.springframework.boot.autoconfigure.amqp.PropertiesRabbitConnectionDetails";
-    private static final String SSL_BUNDLE_RABBIT_CONNECTION_FACTORY_BEAN = "org.springframework.boot.autoconfigure.amqp.SslBundleRabbitConnectionFactoryBean";
-    private static final String RABBIT_ANNOTATION_DRIVEN_CONFIGURATION = "org.springframework.boot.autoconfigure.amqp.RabbitAnnotationDrivenConfiguration";
+    private static final String PROPERTIES_RABBIT_CONNECTION_DETAILS = "org.springframework.boot.amqp.autoconfigure.PropertiesRabbitConnectionDetails";
+    private static final String SSL_BUNDLE_RABBIT_CONNECTION_FACTORY_BEAN = "org.springframework.boot.amqp.autoconfigure.SslBundleRabbitConnectionFactoryBean";
+    private static final String RABBIT_ANNOTATION_DRIVEN_CONFIGURATION = "org.springframework.boot.amqp.autoconfigure.RabbitAnnotationDrivenConfiguration";
 
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {

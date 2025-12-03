@@ -21,6 +21,9 @@ import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.util.ClassUtils;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RabbitMultiSourcesRuntimeHintsTests {
@@ -31,20 +34,20 @@ class RabbitMultiSourcesRuntimeHintsTests {
         new RabbitMultiSourcesRuntimeHints().registerHints(hints, getClass().getClassLoader());
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onType(TypeReference.of("org.springframework.boot.autoconfigure.amqp.PropertiesRabbitConnectionDetails")))
+                .onType(TypeReference.of("org.springframework.boot.amqp.autoconfigure.PropertiesRabbitConnectionDetails")))
                 .accepts(hints);
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onConstructor(resolveConstructor("org.springframework.boot.autoconfigure.amqp.SslBundleRabbitConnectionFactoryBean")))
+                .onConstructorInvocation(resolveConstructor("org.springframework.boot.amqp.autoconfigure.SslBundleRabbitConnectionFactoryBean")))
                 .accepts(hints);
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onMethod(resolveMethod("org.springframework.boot.autoconfigure.amqp.RabbitAnnotationDrivenConfiguration",
+                .onMethodInvocation(resolveMethod("org.springframework.boot.amqp.autoconfigure.RabbitAnnotationDrivenConfiguration",
                         "simpleListenerConfigurer")))
                 .accepts(hints);
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onMethod(resolveMethod("org.springframework.boot.autoconfigure.amqp.RabbitAnnotationDrivenConfiguration",
+                .onMethodInvocation(resolveMethod("org.springframework.boot.amqp.autoconfigure.RabbitAnnotationDrivenConfiguration",
                         "directListenerConfigurer")))
                 .accepts(hints);
     }
@@ -57,7 +60,7 @@ class RabbitMultiSourcesRuntimeHintsTests {
         }
     }
 
-    private java.lang.reflect.Constructor<?> resolveConstructor(String className, Class<?>... parameterTypes) {
+    private Constructor<?> resolveConstructor(String className, Class<?>... parameterTypes) {
         try {
             return resolveClass(className).getDeclaredConstructor(parameterTypes);
         } catch (NoSuchMethodException ex) {
@@ -65,7 +68,7 @@ class RabbitMultiSourcesRuntimeHintsTests {
         }
     }
 
-    private java.lang.reflect.Method resolveMethod(String className, String methodName, Class<?>... parameterTypes) {
+    private Method resolveMethod(String className, String methodName, Class<?>... parameterTypes) {
         try {
             return resolveClass(className).getDeclaredMethod(methodName, parameterTypes);
         } catch (NoSuchMethodException ex) {
