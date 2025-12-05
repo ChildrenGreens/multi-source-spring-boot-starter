@@ -47,10 +47,10 @@ public abstract class AbstractMultiSourcesRegistrar<D> implements ImportBeanDefi
     @Override
     public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata, @NonNull BeanDefinitionRegistry registry) {
 
-        Class<MultiSourcesProperties<D>> clazz = (Class<MultiSourcesProperties<D>>) getMultiSourcesPropertiesClass();
+        Class<? extends MultiSourcesProperties<D>> clazz = getMultiSourcesPropertiesClass();
 
         ConfigurationProperties annotation = clazz.getAnnotation(ConfigurationProperties.class);
-        BindResult<@NonNull MultiSourcesProperties<D>> bind = Binder.get(environment).bind(annotation.prefix(), clazz);
+        BindResult<? extends @NonNull MultiSourcesProperties<D>> bind = Binder.get(environment).bind(annotation.prefix(), clazz);
 
         MultiSourcesProperties<D> multiSourcesProperties = bind.get();
 
