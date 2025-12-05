@@ -15,6 +15,7 @@
  */
 package com.childrengreens.multi.source;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -32,7 +33,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -45,20 +45,20 @@ public abstract class AbstractMultiSourcesRegistrar<D> implements ImportBeanDefi
     protected Environment environment;
 
     @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+    public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata, @NonNull BeanDefinitionRegistry registry) {
 
         Class<MultiSourcesProperties<D>> clazz = (Class<MultiSourcesProperties<D>>) getMultiSourcesPropertiesClass();
 
         ConfigurationProperties annotation = clazz.getAnnotation(ConfigurationProperties.class);
-        BindResult<MultiSourcesProperties<D>> bind = Binder.get(environment).bind(annotation.prefix(), clazz);
+        BindResult<@NonNull MultiSourcesProperties<D>> bind = Binder.get(environment).bind(annotation.prefix(), clazz);
 
         MultiSourcesProperties<D> multiSourcesProperties = bind.get();
 
-        if (Objects.isNull(multiSourcesProperties) || CollectionUtils.isEmpty(multiSourcesProperties.getSources())) {
+        if (CollectionUtils.isEmpty(multiSourcesProperties.getSources())) {
             return;
         }
 
-        if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
+        if (registry instanceof ConfigurableListableBeanFactory) {
             multiSourcesProperties.getSources().forEach((name, source ) -> {
 
                 // Whether it is Primary
@@ -143,7 +143,7 @@ public abstract class AbstractMultiSourcesRegistrar<D> implements ImportBeanDefi
     }
 
     @Override
-    public void setEnvironment(Environment environment) {
+    public void setEnvironment(@NonNull Environment environment) {
         this.environment = environment;
     }
 

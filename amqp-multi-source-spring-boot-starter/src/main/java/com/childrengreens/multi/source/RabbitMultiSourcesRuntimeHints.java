@@ -15,6 +15,7 @@
  */
 package com.childrengreens.multi.source;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -37,7 +38,7 @@ public class RabbitMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
     private static final String RABBIT_ANNOTATION_DRIVEN_CONFIGURATION = "org.springframework.boot.amqp.autoconfigure.RabbitAnnotationDrivenConfiguration";
 
     @Override
-    public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+    public void registerHints(@NonNull RuntimeHints hints, ClassLoader classLoader) {
         registerConnectionDetails(hints, classLoader);
         registerSslBundleConnectionFactoryBean(hints, classLoader);
         registerAnnotationDrivenConfiguration(hints, classLoader);

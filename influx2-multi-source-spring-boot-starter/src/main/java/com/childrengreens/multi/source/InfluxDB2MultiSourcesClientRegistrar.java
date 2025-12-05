@@ -19,6 +19,7 @@ import com.influxdb.client.InfluxDBClient;
 import com.influxdb.spring.influx.InfluxDB2AutoConfiguration;
 import com.influxdb.spring.influx.InfluxDB2OkHttpClientBuilderProvider;
 import com.influxdb.spring.influx.InfluxDB2Properties;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -28,7 +29,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  *
  * @author ChildrenGreens
  */
-public class InfluxDBMultiSourcesClientRegistrar extends AbstractMultiSourcesRegistrar<InfluxDB2Properties> {
+public class InfluxDB2MultiSourcesClientRegistrar extends AbstractMultiSourcesRegistrar<InfluxDB2Properties> {
     @Override
     void registerBeanDefinitionsForSource(String name, InfluxDB2Properties source, BeanDefinitionRegistry registry, Boolean isPrimary) {
         if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
@@ -38,7 +39,7 @@ public class InfluxDBMultiSourcesClientRegistrar extends AbstractMultiSourcesReg
                     generateBeanName(InfluxDBClient.class, name),
                     isPrimary,
                     () -> {
-                        ObjectProvider<InfluxDB2OkHttpClientBuilderProvider> builderProvider = beanFactory.getBeanProvider(InfluxDB2OkHttpClientBuilderProvider.class);
+                        ObjectProvider<@NonNull InfluxDB2OkHttpClientBuilderProvider> builderProvider = beanFactory.getBeanProvider(InfluxDB2OkHttpClientBuilderProvider.class);
                         InfluxDB2AutoConfiguration influxDB2AutoConfiguration = new InfluxDB2AutoConfiguration(source, builderProvider);
                         return influxDB2AutoConfiguration.influxDBClient();
                     });

@@ -15,6 +15,7 @@
  */
 package com.childrengreens.multi.source;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -34,7 +35,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 public class RedisTemplateRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
     @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+    public void postProcessBeanDefinitionRegistry(@NonNull BeanDefinitionRegistry registry) throws BeansException {
 
         if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
             String[] beanNames = beanFactory.getBeanNamesForType(RedisConnectionFactory.class);
@@ -45,7 +46,7 @@ public class RedisTemplateRegistryPostProcessor implements BeanDefinitionRegistr
                 boolean primary = bd.isPrimary();
 
                 // suffix
-                String suffix = null;
+                String suffix;
                 if (beanName.endsWith(LettuceConnectionFactory.class.getSimpleName())) {
                     suffix = LettuceConnectionFactory.class.getSimpleName();
                 } else {

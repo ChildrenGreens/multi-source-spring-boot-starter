@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Import;
  */
 
 @AutoConfiguration(before = InfluxDB2AutoConfiguration.class)
-@Import(InfluxDBMultiSourcesClientRegistrar.class)
+@Import(InfluxDB2MultiSourcesClientRegistrar.class)
 public class InfluxDB2MultiSourcesAutoConfiguration {
 
 

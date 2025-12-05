@@ -15,6 +15,7 @@
  */
 package com.childrengreens.multi.source;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.amqp.rabbit.config.ContainerCustomizer;
 import org.springframework.amqp.rabbit.config.DirectRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
@@ -88,9 +89,9 @@ public class RabbitMultiSourcesAnnotationDrivenRegistrar extends AbstractRabbitM
                                 isPrimary,
                                 ()-> {
                                     SimpleRabbitListenerContainerFactoryConfigurer configurer = beanFactory.getBean(simpleConfigurerBeanName, SimpleRabbitListenerContainerFactoryConfigurer.class);
-                                    ResolvableType resolvableType = ResolvableType.forType(new ParameterizedTypeReference<ContainerCustomizer<SimpleMessageListenerContainer>>() {
+                                    ResolvableType resolvableType = ResolvableType.forType(new ParameterizedTypeReference<@NonNull ContainerCustomizer<@NonNull SimpleMessageListenerContainer>>() {
                                     });
-                                    ObjectProvider<ContainerCustomizer<SimpleMessageListenerContainer>> simpleContainerCustomizer = beanFactory.getBeanProvider(resolvableType);
+                                    ObjectProvider<@NonNull ContainerCustomizer<@NonNull SimpleMessageListenerContainer>> simpleContainerCustomizer = beanFactory.getBeanProvider(resolvableType);
                                     ConnectionFactory connectionFactory = getConnectionFactoryBean(name, beanFactory);
 
                                     SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
@@ -131,9 +132,9 @@ public class RabbitMultiSourcesAnnotationDrivenRegistrar extends AbstractRabbitM
                                 isPrimary,
                                 ()-> {
                                     DirectRabbitListenerContainerFactoryConfigurer configurer = beanFactory.getBean(directConfigurerBeanName, DirectRabbitListenerContainerFactoryConfigurer.class);
-                                    ResolvableType resolvableType = ResolvableType.forType(new ParameterizedTypeReference<ContainerCustomizer<DirectMessageListenerContainer>>() {
+                                    ResolvableType resolvableType = ResolvableType.forType(new ParameterizedTypeReference<@NonNull ContainerCustomizer<@NonNull DirectMessageListenerContainer>>() {
                                     });
-                                    ObjectProvider<ContainerCustomizer<DirectMessageListenerContainer>> directContainerCustomizer = beanFactory.getBeanProvider(resolvableType);
+                                    ObjectProvider<@NonNull ContainerCustomizer<@NonNull DirectMessageListenerContainer>> directContainerCustomizer = beanFactory.getBeanProvider(resolvableType);
                                     ConnectionFactory connectionFactory = getConnectionFactoryBean(name, beanFactory);
 
                                     DirectRabbitListenerContainerFactory factory = new DirectRabbitListenerContainerFactory();

@@ -15,6 +15,7 @@
  */
 package com.childrengreens.multi.source;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -47,8 +48,8 @@ public class RabbitMultiSourcesTemplateRegistrar extends AbstractRabbitMultiSour
                     rabbitTemplateConfigurerBeanName,
                     isPrimary,
                     ()-> {
-                        ObjectProvider<MessageConverter> messageConverter = beanFactory.getBeanProvider(MessageConverter.class);
-                        ObjectProvider<RabbitTemplateRetrySettingsCustomizer> retryTemplateCustomizers = beanFactory.getBeanProvider(RabbitTemplateRetrySettingsCustomizer.class);
+                        ObjectProvider<@NonNull MessageConverter> messageConverter = beanFactory.getBeanProvider(MessageConverter.class);
+                        ObjectProvider<@NonNull RabbitTemplateRetrySettingsCustomizer> retryTemplateCustomizers = beanFactory.getBeanProvider(RabbitTemplateRetrySettingsCustomizer.class);
 
                         RabbitTemplateConfigurer configurer = new RabbitTemplateConfigurer(source);
                         configurer.setMessageConverter(messageConverter.getIfAvailable());
@@ -65,7 +66,7 @@ public class RabbitMultiSourcesTemplateRegistrar extends AbstractRabbitMultiSour
                     () -> {
                         RabbitTemplateConfigurer configurer = beanFactory.getBean(rabbitTemplateConfigurerBeanName, RabbitTemplateConfigurer.class);
                         ConnectionFactory connectionFactory = getConnectionFactoryBean(name, beanFactory);
-                        ObjectProvider<RabbitTemplateCustomizer> customizers = beanFactory.getBeanProvider(RabbitTemplateCustomizer.class);
+                        ObjectProvider<@NonNull RabbitTemplateCustomizer> customizers = beanFactory.getBeanProvider(RabbitTemplateCustomizer.class);
 
 
                         RabbitTemplate template = new RabbitTemplate();

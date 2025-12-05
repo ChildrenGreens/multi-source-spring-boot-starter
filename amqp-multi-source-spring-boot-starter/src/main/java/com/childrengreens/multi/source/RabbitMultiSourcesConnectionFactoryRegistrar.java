@@ -18,6 +18,7 @@ package com.childrengreens.multi.source;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.impl.CredentialsProvider;
 import com.rabbitmq.client.impl.CredentialsRefreshService;
+import org.jspecify.annotations.NonNull;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionNameStrategy;
 import org.springframework.amqp.rabbit.connection.RabbitConnectionFactoryBean;
@@ -52,7 +53,7 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
                     rabbitConnectionDetailsBeanName,
                     isPrimary,
                     () -> {
-                        ObjectProvider<SslBundles> sslBundles = beanFactory.getBeanProvider(SslBundles.class);
+                        ObjectProvider<@NonNull SslBundles> sslBundles = beanFactory.getBeanProvider(SslBundles.class);
                         return (RabbitConnectionDetails) newInstance(rabbitConnectionDetailsClassName, new Class[]{RabbitProperties.class, SslBundles.class}, source, sslBundles.getIfAvailable());
                     });
 
@@ -64,8 +65,8 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
                     isPrimary,
                     () -> {
                         RabbitConnectionDetails connectionDetails = beanFactory.getBean(rabbitConnectionDetailsBeanName, RabbitConnectionDetails.class);
-                        ObjectProvider<CredentialsProvider> credentialsProvider = beanFactory.getBeanProvider(CredentialsProvider.class);
-                        ObjectProvider<CredentialsRefreshService> credentialsRefreshService = beanFactory.getBeanProvider(CredentialsRefreshService.class);
+                        ObjectProvider<@NonNull CredentialsProvider> credentialsProvider = beanFactory.getBeanProvider(CredentialsProvider.class);
+                        ObjectProvider<@NonNull CredentialsRefreshService> credentialsRefreshService = beanFactory.getBeanProvider(CredentialsRefreshService.class);
 
                         RabbitConnectionFactoryBeanConfigurer configurer = new RabbitConnectionFactoryBeanConfigurer(resourceLoader,
                                 source, connectionDetails);
@@ -83,7 +84,7 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
                     () -> {
                         RabbitConnectionDetails rabbitConnectionDetails = beanFactory.getBean(rabbitConnectionDetailsBeanName, RabbitConnectionDetails.class);
                         CachingConnectionFactoryConfigurer configurer = new CachingConnectionFactoryConfigurer(source, rabbitConnectionDetails);
-                        ObjectProvider<ConnectionNameStrategy> connectionNameStrategy = beanFactory.getBeanProvider(ConnectionNameStrategy.class);
+                        ObjectProvider<@NonNull ConnectionNameStrategy> connectionNameStrategy = beanFactory.getBeanProvider(ConnectionNameStrategy.class);
                         configurer.setConnectionNameStrategy(connectionNameStrategy.getIfUnique());
                         return configurer;
                     });
@@ -96,7 +97,7 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
                     () -> {
                         RabbitConnectionFactoryBeanConfigurer rabbitConnectionFactoryBeanConfigurer = beanFactory.getBean(rabbitConnectionFactoryBeanConfigurerBeanName, RabbitConnectionFactoryBeanConfigurer.class);
                         CachingConnectionFactoryConfigurer rabbitCachingConnectionFactoryConfigurer = beanFactory.getBean(cachingConnectionFactoryConfigurerBeanName, CachingConnectionFactoryConfigurer.class);
-                        ObjectProvider<ConnectionFactoryCustomizer> connectionFactoryCustomizers = beanFactory.getBeanProvider(ConnectionFactoryCustomizer.class);
+                        ObjectProvider<@NonNull ConnectionFactoryCustomizer> connectionFactoryCustomizers = beanFactory.getBeanProvider(ConnectionFactoryCustomizer.class);
 
                         RabbitConnectionFactoryBean connectionFactoryBean = (RabbitConnectionFactoryBean) newInstance(sslBundleRabbitConnectionFactoryBeanClassName, null);
                         rabbitConnectionFactoryBeanConfigurer.configure(connectionFactoryBean);
@@ -117,7 +118,7 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
 
 
     @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
+    public void setResourceLoader(@NonNull ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 }
