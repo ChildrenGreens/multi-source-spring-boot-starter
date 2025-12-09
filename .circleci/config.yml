@@ -17,7 +17,7 @@ jobs:
           name: Build and test
           command: mvn clean install -B -V
       - codecov/upload:
-          file: "*/target/site/jacoco/jacoco.xml"  # Upload per-module JaCoCo XML reports
+          file: "**/target/site/jacoco/jacoco.xml"  # Upload per-module JaCoCo XML reports
 
 workflows:
   build-multi-source-starter:
