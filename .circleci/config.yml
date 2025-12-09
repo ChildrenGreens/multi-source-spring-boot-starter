@@ -1,7 +1,7 @@
 version: 2.1  # CircleCI config schema version
 
 orbs:
-  codecov: codecov/codecov@3.2.3  # Official Codecov orb for uploads
+  codecov: codecov/codecov@4  # Official Codecov orb for uploads
 
 executors:
   java17:
