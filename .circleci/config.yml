@@ -17,7 +17,13 @@ jobs:
           name: Build and test
           command: mvn clean install -B -V
       - codecov/upload:
-          file: "**/target/site/jacoco/jacoco.xml"  # Upload per-module JaCoCo XML reports
+          file: "context-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
+      - codecov/upload:
+          file: "influx2-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
+      - codecov/upload:
+          file: "redis-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
+      - codecov/upload:
+          file: "amqp-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
 
 workflows:
   build-multi-source-starter:
