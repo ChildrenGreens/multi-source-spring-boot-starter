@@ -17,8 +17,6 @@ jobs:
           name: Build and test
           command: mvn clean install -B -V
       - codecov/upload:
-          file: "context-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
-      - codecov/upload:
           file: "influx2-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
       - codecov/upload:
           file: "redis-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
