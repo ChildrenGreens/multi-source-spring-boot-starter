@@ -17,6 +17,8 @@ package com.childrengreens.multi.source;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -24,6 +26,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.util.ClassUtils;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -79,5 +82,35 @@ class RedisConnectionMultiSourcesRegistrarTests {
                     assertThat(context.getBean("betaLettuceConnectionFactory"))
                             .isInstanceOf(LettuceConnectionFactory.class);
                 });
+    }
+
+    @Test
+    @EnabledForJreRange(min = JRE.JAVA_21)
+    void usesVirtualThreadExecutorWhenEnabled() {
+        this.contextRunner
+                .withPropertyValues(
+                        "spring.threads.virtual.enabled=true",
+                        "spring.multi-sources.redis.primary-key=alpha",
+                        "spring.multi-sources.redis.sources.alpha.host=localhost",
+                        "spring.multi-sources.redis.sources.alpha.port=6379",
+                        "spring.multi-sources.redis.sources.beta.host=localhost",
+                        "spring.multi-sources.redis.sources.beta.port=6380"
+                )
+                .run((context) -> {
+                    LettuceConnectionFactory factory = context.getBean("alphaLettuceConnectionFactory", LettuceConnectionFactory.class);
+                    Object executor = resolveField(factory, "executor");
+                    assertThat(executor).isInstanceOf(SimpleAsyncTaskExecutor.class);
+                    assertThat(resolveField(executor, "virtualThreadDelegate")).isNotNull();
+                });
+    }
+
+    private Object resolveField(Object target, String fieldName) {
+        try {
+            var field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to resolve field '" + fieldName + "' from " + target, ex);
+        }
     }
 }

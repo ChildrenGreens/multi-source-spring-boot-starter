@@ -17,6 +17,8 @@ package com.childrengreens.multi.source;
 
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 import org.springframework.amqp.rabbit.config.ContainerCustomizer;
 import org.springframework.amqp.rabbit.config.DirectRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
@@ -27,6 +29,8 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.VirtualThreadTaskExecutor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -71,6 +75,40 @@ class RabbitMultiSourcesAnnotationDrivenRegistrarTests {
             assertThat(simpleFactory.createListenerContainer()).isNotNull();
             assertThat(directFactory.createListenerContainer()).isNotNull();
         });
+    }
+
+    @Test
+    @EnabledForJreRange(min = JRE.JAVA_21)
+    void usesVirtualThreadTaskExecutorWhenEnabled() {
+        this.contextRunner
+                .withPropertyValues("spring.threads.virtual.enabled=true")
+                .run((context) -> {
+                    TaskExecutor simpleExecutor = (TaskExecutor) resolveFieldWithHierarchy(
+                            context.getBean("alphaSimpleRabbitListenerContainerFactory", SimpleRabbitListenerContainerFactory.class)
+                    );
+                    TaskExecutor directExecutor = (TaskExecutor) resolveFieldWithHierarchy(
+                            context.getBean("betaDirectRabbitListenerContainerFactory", DirectRabbitListenerContainerFactory.class)
+                    );
+
+                    assertThat(simpleExecutor).isInstanceOf(VirtualThreadTaskExecutor.class);
+                    assertThat(directExecutor).isInstanceOf(VirtualThreadTaskExecutor.class);
+                });
+    }
+
+    private Object resolveFieldWithHierarchy(Object target) {
+        Class<?> current = target.getClass();
+        while (current != null) {
+            try {
+                var field = current.getDeclaredField("taskExecutor");
+                field.setAccessible(true);
+                return field.get(target);
+            } catch (NoSuchFieldException ex) {
+                current = current.getSuperclass();
+            } catch (Exception ex) {
+                throw new IllegalStateException("Failed to resolve field '" + "taskExecutor" + "' from " + target, ex);
+            }
+        }
+        throw new IllegalStateException("Field '" + "taskExecutor" + "' not found in hierarchy of " + target);
     }
 
     @Configuration(proxyBeanMethods = false)
