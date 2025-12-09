@@ -1,23 +1,23 @@
-version: 2.1
+version: 2.1  # CircleCI config schema version
 
 orbs:
-  codecov: codecov/codecov@4
+  codecov: codecov/codecov@3.2.3  # Official Codecov orb for uploads
 
 executors:
   java17:
     docker:
-      - image: cimg/openjdk:17.0
+      - image: cimg/openjdk:17.0  # Java 17 base image
 
 jobs:
   build-and-test:
     executor: java17
     steps:
-      - checkout
+      - checkout  # Fetch repository code
       - run:
           name: Build and test
           command: mvn clean install -B -V
       - codecov/upload:
-          file: "*/target/site/jacoco/jacoco.xml"
+          file: "*/target/site/jacoco/jacoco.xml"  # Upload per-module JaCoCo XML reports
 
 workflows:
   build-multi-source-starter:
