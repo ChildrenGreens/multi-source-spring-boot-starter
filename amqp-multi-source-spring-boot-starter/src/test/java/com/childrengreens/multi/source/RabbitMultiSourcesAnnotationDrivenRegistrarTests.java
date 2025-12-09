@@ -15,12 +15,18 @@
  */
 package com.childrengreens.multi.source;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.config.ContainerCustomizer;
 import org.springframework.amqp.rabbit.config.DirectRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.listener.DirectMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.boot.amqp.autoconfigure.RabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,6 +40,7 @@ class RabbitMultiSourcesAnnotationDrivenRegistrarTests {
                     RabbitAutoConfiguration.class,
                     RabbitMultiSourcesAutoConfiguration.class
             ))
+            .withUserConfiguration(ContainerCustomizersConfiguration.class)
             .withPropertyValues(
                     "spring.multi-sources.rabbitmq.primary-key=alpha",
                     // alpha -> SIMPLE listener container
@@ -58,6 +65,25 @@ class RabbitMultiSourcesAnnotationDrivenRegistrarTests {
                     .isInstanceOf(SimpleRabbitListenerContainerFactory.class);
             assertThat(context.getBean("betaDirectRabbitListenerContainerFactory"))
                     .isInstanceOf(DirectRabbitListenerContainerFactory.class);
+
+            SimpleRabbitListenerContainerFactory simpleFactory = context.getBean("alphaSimpleRabbitListenerContainerFactory", SimpleRabbitListenerContainerFactory.class);
+            DirectRabbitListenerContainerFactory directFactory = context.getBean("betaDirectRabbitListenerContainerFactory", DirectRabbitListenerContainerFactory.class);
+            assertThat(simpleFactory.createListenerContainer()).isNotNull();
+            assertThat(directFactory.createListenerContainer()).isNotNull();
         });
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class ContainerCustomizersConfiguration {
+
+        @Bean
+        ContainerCustomizer<@NonNull SimpleMessageListenerContainer> simpleContainerCustomizer() {
+            return (container) -> container.setConcurrentConsumers(2);
+        }
+
+        @Bean
+        ContainerCustomizer<@NonNull DirectMessageListenerContainer> directContainerCustomizer() {
+            return (container) -> container.setConsumersPerQueue(1);
+        }
     }
 }

@@ -29,6 +29,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RedisMultiSourcesRuntimeHintsTests {
 
@@ -69,6 +70,24 @@ class RedisMultiSourcesRuntimeHintsTests {
                             "createJedisConnectionFactory", ObjectProvider.class)))
                     .accepts(hints);
         }
+    }
+
+    @Test
+    void failsWhenRequiredClassesMissing() {
+        ClassLoader missingClasses = new ClassLoader(getClass().getClassLoader()) {
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                if (name.equals("org.springframework.boot.data.redis.autoconfigure.PropertiesDataRedisConnectionDetails")) {
+                    throw new ClassNotFoundException(name);
+                }
+                return super.loadClass(name, resolve);
+            }
+        };
+
+        RuntimeHints hints = new RuntimeHints();
+        assertThatThrownBy(() -> new RedisMultiSourcesRuntimeHints().registerHints(hints, missingClasses))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Failed to resolve class for runtime hints");
     }
 
     private Class<?> resolveClass(String className) {
