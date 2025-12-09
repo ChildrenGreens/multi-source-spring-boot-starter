@@ -25,6 +25,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class RabbitMultiSourcesRuntimeHintsTests {
 
@@ -50,6 +51,24 @@ class RabbitMultiSourcesRuntimeHintsTests {
                 .onMethodInvocation(resolveMethod("org.springframework.boot.amqp.autoconfigure.RabbitAnnotationDrivenConfiguration",
                         "directListenerConfigurer")))
                 .accepts(hints);
+    }
+
+    @Test
+    void failsWhenRequiredTypesMissing() {
+        ClassLoader missingRabbitClasses = new ClassLoader(getClass().getClassLoader()) {
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                if (name.equals("org.springframework.boot.amqp.autoconfigure.PropertiesRabbitConnectionDetails")) {
+                    throw new ClassNotFoundException(name);
+                }
+                return super.loadClass(name, resolve);
+            }
+        };
+
+        RuntimeHints hints = new RuntimeHints();
+        assertThatThrownBy(() -> new RabbitMultiSourcesRuntimeHints().registerHints(hints, missingRabbitClasses))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Failed to resolve class for runtime hints");
     }
 
     private Class<?> resolveClass(String className) {
