@@ -1,0 +1,25 @@
+version: 2.1
+
+orbs:
+  codecov: codecov/codecov@4
+
+executors:
+  java17:
+    docker:
+      - image: cimg/openjdk:17.0
+
+jobs:
+  build-and-test:
+    executor: java17
+    steps:
+      - checkout
+      - run:
+          name: Build and test
+          command: mvn clean install -B -V
+      - codecov/upload:
+          file: "*/target/site/jacoco/jacoco.xml"
+
+workflows:
+  build-multi-source-starter:
+    jobs:
+      - build-and-test
