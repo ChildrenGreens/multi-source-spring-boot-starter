@@ -43,16 +43,13 @@ import java.lang.reflect.Method;
  */
 public class RabbitMultiSourcesAnnotationDrivenRegistrar extends AbstractRabbitMultiSourcesRegistrar {
 
-    private static final String rabbitAnnotationDrivenConfigurationClassName = "org.springframework.boot.amqp.autoconfigure.RabbitAnnotationDrivenConfiguration";
-
-
     @Override
     void registerBeanDefinitionsForSource(String name, RabbitProperties source, BeanDefinitionRegistry registry, Boolean isPrimary) {
 
 
         if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
             try {
-                Class<?> clazz = ClassUtils.forName(rabbitAnnotationDrivenConfigurationClassName, ClassUtils.getDefaultClassLoader());
+                Class<?> clazz = ClassUtils.forName(RabbitAmqpClassNames.RABBIT_ANNOTATION_DRIVEN_CONFIGURATION, ClassUtils.getDefaultClassLoader());
                 Method simpleListenerConfigurer = clazz.getDeclaredMethod("simpleListenerConfigurer");
                 Method directListenerConfigurer = clazz.getDeclaredMethod("directListenerConfigurer");
                 RabbitProperties.ContainerType type = source.getListener().getType();

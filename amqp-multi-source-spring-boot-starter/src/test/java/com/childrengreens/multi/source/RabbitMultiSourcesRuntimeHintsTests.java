@@ -35,20 +35,20 @@ class RabbitMultiSourcesRuntimeHintsTests {
         new RabbitMultiSourcesRuntimeHints().registerHints(hints, getClass().getClassLoader());
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onType(TypeReference.of("org.springframework.boot.amqp.autoconfigure.PropertiesRabbitConnectionDetails")))
+                .onType(TypeReference.of(RabbitAmqpClassNames.PROPERTIES_RABBIT_CONNECTION_DETAILS)))
                 .accepts(hints);
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onConstructorInvocation(resolveConstructor("org.springframework.boot.amqp.autoconfigure.SslBundleRabbitConnectionFactoryBean")))
+                .onConstructorInvocation(resolveConstructor(RabbitAmqpClassNames.SSL_BUNDLE_RABBIT_CONNECTION_FACTORY_BEAN)))
                 .accepts(hints);
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onMethodInvocation(resolveMethod("org.springframework.boot.amqp.autoconfigure.RabbitAnnotationDrivenConfiguration",
+                .onMethodInvocation(resolveMethod(RabbitAmqpClassNames.RABBIT_ANNOTATION_DRIVEN_CONFIGURATION,
                         "simpleListenerConfigurer")))
                 .accepts(hints);
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onMethodInvocation(resolveMethod("org.springframework.boot.amqp.autoconfigure.RabbitAnnotationDrivenConfiguration",
+                .onMethodInvocation(resolveMethod(RabbitAmqpClassNames.RABBIT_ANNOTATION_DRIVEN_CONFIGURATION,
                         "directListenerConfigurer")))
                 .accepts(hints);
     }
@@ -58,7 +58,7 @@ class RabbitMultiSourcesRuntimeHintsTests {
         ClassLoader missingRabbitClasses = new ClassLoader(getClass().getClassLoader()) {
             @Override
             protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-                if (name.equals("org.springframework.boot.amqp.autoconfigure.PropertiesRabbitConnectionDetails")) {
+                if (name.equals(RabbitAmqpClassNames.PROPERTIES_RABBIT_CONNECTION_DETAILS)) {
                     throw new ClassNotFoundException(name);
                 }
                 return super.loadClass(name, resolve);

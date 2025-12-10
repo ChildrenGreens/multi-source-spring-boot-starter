@@ -35,23 +35,18 @@ import java.lang.reflect.Method;
  */
 public class RedisMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
 
-    private static final String JEDIS_TYPE = "redis.clients.jedis.Jedis";
-    private static final String PROPERTIES_REDIS_CONNECTION_DETAILS = "org.springframework.boot.data.redis.autoconfigure.PropertiesDataRedisConnectionDetails";
-    private static final String LETTUCE_CONNECTION_CONFIGURATION = "org.springframework.boot.data.redis.autoconfigure.LettuceConnectionConfiguration";
-    private static final String JEDIS_CONNECTION_CONFIGURATION = "org.springframework.boot.data.redis.autoconfigure.JedisConnectionConfiguration";
-
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         registerConnectionDetails(hints, classLoader);
         registerLettuceConfiguration(hints, classLoader);
-        if (ClassUtils.isPresent(JEDIS_TYPE, classLoader) && ClassUtils.isPresent(JEDIS_CONNECTION_CONFIGURATION, classLoader)) {
+        if (ClassUtils.isPresent(RedisDataClassNames.JEDIS_TYPE, classLoader) && ClassUtils.isPresent(RedisDataClassNames.JEDIS_CONNECTION_CONFIGURATION, classLoader)) {
             registerJedisConfiguration(hints, classLoader);
         }
     }
 
     private void registerConnectionDetails(RuntimeHints hints, ClassLoader classLoader) {
         try {
-            Class<?> connectionDetails = resolveClass(PROPERTIES_REDIS_CONNECTION_DETAILS, classLoader);
+            Class<?> connectionDetails = resolveClass(RedisDataClassNames.PROPERTIES_DATA_REDIS_CONNECTION_DETAILS, classLoader);
             Constructor<?> constructor = connectionDetails.getDeclaredConstructor(DataRedisProperties.class, SslBundles.class);
             hints.reflection().registerConstructor(constructor, ExecutableMode.INVOKE);
         } catch (NoSuchMethodException ex) {
@@ -61,7 +56,7 @@ public class RedisMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
 
     private void registerLettuceConfiguration(RuntimeHints hints, ClassLoader classLoader) {
         try {
-            Class<?> configuration = resolveClass(LETTUCE_CONNECTION_CONFIGURATION, classLoader);
+            Class<?> configuration = resolveClass(RedisDataClassNames.LETTUCE_CONNECTION_CONFIGURATION, classLoader);
             Constructor<?> constructor = configuration
                     .getDeclaredConstructor(DataRedisProperties.class, ObjectProvider.class, ObjectProvider.class,
                             ObjectProvider.class, ObjectProvider.class, DataRedisConnectionDetails.class);
@@ -76,7 +71,7 @@ public class RedisMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
 
     private void registerJedisConfiguration(RuntimeHints hints, ClassLoader classLoader) {
         try {
-            Class<?> configuration = resolveClass(JEDIS_CONNECTION_CONFIGURATION, classLoader);
+            Class<?> configuration = resolveClass(RedisDataClassNames.JEDIS_CONNECTION_CONFIGURATION, classLoader);
             Constructor<?> constructor = configuration
                     .getDeclaredConstructor(DataRedisProperties.class, ObjectProvider.class, ObjectProvider.class,
                             ObjectProvider.class, ObjectProvider.class, DataRedisConnectionDetails.class);

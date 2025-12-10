@@ -41,16 +41,16 @@ class RedisMultiSourcesRuntimeHintsTests {
         new RedisMultiSourcesRuntimeHints().registerHints(hints, getClass().getClassLoader());
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onType(TypeReference.of("org.springframework.boot.data.redis.autoconfigure.PropertiesDataRedisConnectionDetails")))
+                .onType(TypeReference.of(RedisDataClassNames.PROPERTIES_DATA_REDIS_CONNECTION_DETAILS)))
                 .accepts(hints);
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onConstructorInvocation(resolveConstructor("org.springframework.boot.data.redis.autoconfigure.LettuceConnectionConfiguration",
+                .onConstructorInvocation(resolveConstructor(RedisDataClassNames.LETTUCE_CONNECTION_CONFIGURATION,
                         DataRedisProperties.class, ObjectProvider.class, ObjectProvider.class, ObjectProvider.class, ObjectProvider.class, DataRedisConnectionDetails.class)))
                 .accepts(hints);
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onMethodInvocation(resolveMethod("org.springframework.boot.data.redis.autoconfigure.LettuceConnectionConfiguration",
+                .onMethodInvocation(resolveMethod(RedisDataClassNames.LETTUCE_CONNECTION_CONFIGURATION,
                         "createConnectionFactory", ObjectProvider.class, ObjectProvider.class, ClientResources.class)))
                 .accepts(hints);
     }
@@ -61,14 +61,14 @@ class RedisMultiSourcesRuntimeHintsTests {
         ClassLoader classLoader = getClass().getClassLoader();
         new RedisMultiSourcesRuntimeHints().registerHints(hints, classLoader);
 
-        if (ClassUtils.isPresent("redis.clients.jedis.Jedis", classLoader)) {
+        if (ClassUtils.isPresent(RedisDataClassNames.JEDIS_TYPE, classLoader)) {
             assertThat(RuntimeHintsPredicates.reflection()
-                    .onConstructorInvocation(resolveConstructor("org.springframework.boot.data.redis.autoconfigure.JedisConnectionConfiguration",
+                    .onConstructorInvocation(resolveConstructor(RedisDataClassNames.JEDIS_CONNECTION_CONFIGURATION,
                             DataRedisProperties.class, ObjectProvider.class, ObjectProvider.class, ObjectProvider.class, ObjectProvider.class, DataRedisConnectionDetails.class)))
                     .accepts(hints);
 
             assertThat(RuntimeHintsPredicates.reflection()
-                    .onMethodInvocation(resolveMethod("org.springframework.boot.data.redis.autoconfigure.JedisConnectionConfiguration",
+                    .onMethodInvocation(resolveMethod(RedisDataClassNames.JEDIS_CONNECTION_CONFIGURATION,
                             "createJedisConnectionFactory", ObjectProvider.class)))
                     .accepts(hints);
         }
@@ -79,7 +79,7 @@ class RedisMultiSourcesRuntimeHintsTests {
         ClassLoader missingClasses = new ClassLoader(getClass().getClassLoader()) {
             @Override
             protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-                if (name.equals("org.springframework.boot.data.redis.autoconfigure.PropertiesDataRedisConnectionDetails")) {
+                if (name.equals(RedisDataClassNames.PROPERTIES_DATA_REDIS_CONNECTION_DETAILS)) {
                     throw new ClassNotFoundException(name);
                 }
                 return super.loadClass(name, resolve);

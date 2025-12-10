@@ -41,34 +41,25 @@ import java.util.Objects;
 public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRegistrar<DataRedisProperties> {
 
 
-    private static final String redisConnectionDetailsClassName = "org.springframework.boot.data.redis.autoconfigure.PropertiesDataRedisConnectionDetails";
-
-    private static final String lettuceConnectionConfigurationClassName = "org.springframework.boot.data.redis.autoconfigure.LettuceConnectionConfiguration";
-
-    private static final String jedisConnectionConfigurationClassName = "org.springframework.boot.data.redis.autoconfigure.JedisConnectionConfiguration";
-
-    private static final boolean JEDIS_AVAILABLE = ClassUtils.isPresent("redis.clients.jedis.Jedis", ClassUtils.getDefaultClassLoader());
-
-
     @Override
     void registerBeanDefinitionsForSource(String name, DataRedisProperties source, BeanDefinitionRegistry registry, Boolean isPrimary) {
 
         if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
             // register PropertiesDataRedisConnectionDetails
-            String redisConnectionDetailsBeanName = generateBeanName(redisConnectionDetailsClassName, name);
+            String redisConnectionDetailsBeanName = generateBeanName(RedisDataClassNames.PROPERTIES_DATA_REDIS_CONNECTION_DETAILS, name);
             registerBeanDefinition(registry,
                     DataRedisConnectionDetails.class,
                     redisConnectionDetailsBeanName,
                     isPrimary,
                     () -> {
                         ObjectProvider<@NonNull SslBundles> sslBundlesProvider = beanFactory.getBeanProvider(SslBundles.class);
-                        return (DataRedisConnectionDetails) newInstance(redisConnectionDetailsClassName, new Class[]{DataRedisProperties.class, SslBundles.class}, source, sslBundlesProvider.getIfAvailable());
+                        return (DataRedisConnectionDetails) newInstance(RedisDataClassNames.PROPERTIES_DATA_REDIS_CONNECTION_DETAILS, new Class[]{DataRedisProperties.class, SslBundles.class}, source, sslBundlesProvider.getIfAvailable());
                     });
 
             // JedisConnectionFactory or LettuceConnectionFactory
             boolean isJedisConnectionFactory = Objects.nonNull(source.getClientType())
                     && source.getClientType() == DataRedisProperties.ClientType.JEDIS
-                    && JEDIS_AVAILABLE;
+                    && ClassUtils.isPresent(RedisDataClassNames.JEDIS_TYPE, ClassUtils.getDefaultClassLoader());
             Class<? extends RedisConnectionFactory> redisConnectionFactory = isJedisConnectionFactory ? JedisConnectionFactory.class : LettuceConnectionFactory.class;
 
             // register RedisConnectionFactory
@@ -82,10 +73,10 @@ public class RedisConnectionMultiSourcesRegistrar extends AbstractMultiSourcesRe
                         ObjectProvider<@NonNull RedisStandaloneConfiguration> standaloneProvider = beanFactory.getBeanProvider(RedisStandaloneConfiguration.class);
                         ObjectProvider<@NonNull RedisSentinelConfiguration> sentinelProvider = beanFactory.getBeanProvider(RedisSentinelConfiguration.class);
                         ObjectProvider<@NonNull RedisClusterConfiguration> clusterProvider = beanFactory.getBeanProvider(RedisClusterConfiguration.class);
-                        ObjectProvider<@NonNull RedisStaticMasterReplicaConfiguration> masterReplicaProvider = beanFactory.getBeanProvider(RedisStaticMasterReplicaConfiguration.class);
+                            ObjectProvider<@NonNull RedisStaticMasterReplicaConfiguration> masterReplicaProvider = beanFactory.getBeanProvider(RedisStaticMasterReplicaConfiguration.class);
 
                         try {
-                            String connectionConfigurationClassName = isJedisConnectionFactory ? jedisConnectionConfigurationClassName : lettuceConnectionConfigurationClassName;
+                            String connectionConfigurationClassName = isJedisConnectionFactory ? RedisDataClassNames.JEDIS_CONNECTION_CONFIGURATION : RedisDataClassNames.LETTUCE_CONNECTION_CONFIGURATION;
                             Class<?> clazz = ClassUtils.forName(connectionConfigurationClassName, ClassUtils.getDefaultClassLoader());
                             Constructor<?> constructor = clazz.getDeclaredConstructors()[0];
                             constructor.setAccessible(true);

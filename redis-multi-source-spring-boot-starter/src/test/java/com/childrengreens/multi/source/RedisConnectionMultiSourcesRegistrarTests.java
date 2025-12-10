@@ -61,7 +61,7 @@ class RedisConnectionMultiSourcesRegistrarTests {
 
     @Test
     void registersJedisConnectionFactoryWhenRequested() {
-        Assumptions.assumeTrue(ClassUtils.isPresent("redis.clients.jedis.Jedis", getClass().getClassLoader()),
+        Assumptions.assumeTrue(ClassUtils.isPresent(RedisDataClassNames.JEDIS_TYPE, getClass().getClassLoader()),
                 "Jedis not on classpath");
 
         this.contextRunner
