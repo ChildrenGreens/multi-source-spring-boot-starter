@@ -1,7 +1,7 @@
 image:https://img.shields.io/maven-central/v/com.childrengreens/redis-multi-source-spring-boot-starter.svg["Maven Central",link="https://central.sonatype.com/artifact/com.childrengreens/redis-multi-source-spring-boot-starter"]
 image:https://img.shields.io/hexpm/l/plug.svg["Apache 2",link="http://www.apache.org/licenses/LICENSE-2.0"]
 
-= Spring Boot Starter for Multi Data Source (Spring Boot 3)
+= Spring Boot Starter for Multi Data Source (Spring Boot 4)
 
 Production-ready Spring Boot starters that make it easy to configure and consume multiple Redis, RabbitMQ, and InfluxDB 2.x connections in a single application.
 
@@ -13,12 +13,12 @@ The starters wrap Spring Boot auto-configuration patterns and expose a consisten
 
 * Manage multiple Redis, RabbitMQ, and InfluxDB 2.x connections using pure configuration.
 * Deterministic bean naming (`<sourceName><ClassSimpleName>`) keeps injection explicit and type-safe.
-* Built on Spring Boot 3.5.x and Java 17 with familiar `@ConfigurationProperties` support.
+* Built on Spring Boot 4.0.x and Java 17 with familiar `@ConfigurationProperties` support.
 
 == Requirements
 
 * Java 17+
-* Spring Boot 3.5.x (pulled in via the parent BOM)
+* Spring Boot 4.0.x (pulled in via the parent BOM)
 * One or more of the supported back-end clients (Lettuce or Jedis for Redis, Spring AMQP, InfluxDB Java client)
 
 == Modules
