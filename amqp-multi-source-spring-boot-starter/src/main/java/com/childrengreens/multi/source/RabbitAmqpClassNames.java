@@ -15,21 +15,17 @@
  */
 package com.childrengreens.multi.source;
 
-import com.influxdb.spring.influx.InfluxDB2AutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Import;
-
 /**
- * {@link EnableAutoConfiguration Auto-configuration} for Spring Data's multiple InfluxDB2 data sources support.
- *
- * @author ChildrenGreens
+ * Centralized RabbitMQ class names used for reflection/runtime hints.
  */
+final class RabbitAmqpClassNames {
 
-@AutoConfiguration(before = InfluxDB2AutoConfiguration.class)
-@Import(InfluxDB2MultiSourcesClientRegistrar.class)
-public class InfluxDB2MultiSourcesAutoConfiguration {
+    static final String RABBIT_ANNOTATION_DRIVEN_CONFIGURATION = "org.springframework.boot.autoconfigure.amqp.RabbitAnnotationDrivenConfiguration";
 
+    static final String PROPERTIES_RABBIT_CONNECTION_DETAILS = "org.springframework.boot.autoconfigure.amqp.PropertiesRabbitConnectionDetails";
 
+    static final String SSL_BUNDLE_RABBIT_CONNECTION_FACTORY_BEAN = "org.springframework.boot.autoconfigure.amqp.SslBundleRabbitConnectionFactoryBean";
 
+    private RabbitAmqpClassNames() {
+    }
 }

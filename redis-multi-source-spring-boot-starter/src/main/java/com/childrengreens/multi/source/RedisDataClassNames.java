@@ -15,21 +15,19 @@
  */
 package com.childrengreens.multi.source;
 
-import com.influxdb.spring.influx.InfluxDB2AutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Import;
-
 /**
- * {@link EnableAutoConfiguration Auto-configuration} for Spring Data's multiple InfluxDB2 data sources support.
- *
- * @author ChildrenGreens
+ * Centralized Redis class names used for reflection/runtime hints.
  */
+final class RedisDataClassNames {
 
-@AutoConfiguration(before = InfluxDB2AutoConfiguration.class)
-@Import(InfluxDB2MultiSourcesClientRegistrar.class)
-public class InfluxDB2MultiSourcesAutoConfiguration {
+    static final String PROPERTIES_DATA_REDIS_CONNECTION_DETAILS = "org.springframework.boot.autoconfigure.data.redis.PropertiesRedisConnectionDetails";
 
+    static final String LETTUCE_CONNECTION_CONFIGURATION = "org.springframework.boot.autoconfigure.data.redis.LettuceConnectionConfiguration";
 
+    static final String JEDIS_CONNECTION_CONFIGURATION = "org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration";
 
+    static final String JEDIS_TYPE = "redis.clients.jedis.Jedis";
+
+    private RedisDataClassNames() {
+    }
 }

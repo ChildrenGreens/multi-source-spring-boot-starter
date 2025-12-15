@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.amqp.*;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.NonNull;
 
 /**
  * RabbitMQ multi-data-source {@link CachingConnectionFactory} BeanDefinition registrar.
@@ -37,23 +38,19 @@ import org.springframework.core.io.ResourceLoader;
 public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbitMultiSourcesRegistrar implements ResourceLoaderAware {
     private ResourceLoader resourceLoader;
 
-    private static final String rabbitConnectionDetailsClassName = "org.springframework.boot.autoconfigure.amqp.PropertiesRabbitConnectionDetails";
-
-    private static final String sslBundleRabbitConnectionFactoryBeanClassName = "org.springframework.boot.autoconfigure.amqp.SslBundleRabbitConnectionFactoryBean";
-
     @Override
     void registerBeanDefinitionsForSource(String name, RabbitProperties source, BeanDefinitionRegistry registry, Boolean isPrimary) {
 
         if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
             // register PropertiesRabbitConnectionDetails
-            String rabbitConnectionDetailsBeanName = generateBeanName(rabbitConnectionDetailsClassName, name);
+            String rabbitConnectionDetailsBeanName = generateBeanName(RabbitAmqpClassNames.PROPERTIES_RABBIT_CONNECTION_DETAILS, name);
             registerBeanDefinition(registry,
                     RabbitConnectionDetails.class,
                     rabbitConnectionDetailsBeanName,
                     isPrimary,
                     () -> {
                         ObjectProvider<SslBundles> sslBundles = beanFactory.getBeanProvider(SslBundles.class);
-                        return (RabbitConnectionDetails) newInstance(rabbitConnectionDetailsClassName, new Class[]{RabbitProperties.class, SslBundles.class}, source, sslBundles.getIfAvailable());
+                        return (RabbitConnectionDetails) newInstance(RabbitAmqpClassNames.PROPERTIES_RABBIT_CONNECTION_DETAILS, new Class[]{RabbitProperties.class, SslBundles.class}, source, sslBundles.getIfAvailable());
                     });
 
             // register RabbitConnectionFactoryBeanConfigurer
@@ -98,7 +95,7 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
                         CachingConnectionFactoryConfigurer rabbitCachingConnectionFactoryConfigurer = beanFactory.getBean(cachingConnectionFactoryConfigurerBeanName, CachingConnectionFactoryConfigurer.class);
                         ObjectProvider<ConnectionFactoryCustomizer> connectionFactoryCustomizers = beanFactory.getBeanProvider(ConnectionFactoryCustomizer.class);
 
-                        RabbitConnectionFactoryBean connectionFactoryBean = (RabbitConnectionFactoryBean) newInstance(sslBundleRabbitConnectionFactoryBeanClassName, null);
+                        RabbitConnectionFactoryBean connectionFactoryBean = (RabbitConnectionFactoryBean) newInstance(RabbitAmqpClassNames.SSL_BUNDLE_RABBIT_CONNECTION_FACTORY_BEAN, null);
                         rabbitConnectionFactoryBeanConfigurer.configure(connectionFactoryBean);
                         connectionFactoryBean.afterPropertiesSet();
                         try {
@@ -117,7 +114,7 @@ public class RabbitMultiSourcesConnectionFactoryRegistrar extends AbstractRabbit
 
 
     @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
+    public void setResourceLoader(@NonNull ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 }

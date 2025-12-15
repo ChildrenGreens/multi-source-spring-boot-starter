@@ -20,6 +20,7 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.boot.ssl.SslBundles;
+import org.springframework.lang.NonNull;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Constructor;
@@ -32,12 +33,8 @@ import java.lang.reflect.Method;
  */
 public class RabbitMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
 
-    private static final String PROPERTIES_RABBIT_CONNECTION_DETAILS = "org.springframework.boot.autoconfigure.amqp.PropertiesRabbitConnectionDetails";
-    private static final String SSL_BUNDLE_RABBIT_CONNECTION_FACTORY_BEAN = "org.springframework.boot.autoconfigure.amqp.SslBundleRabbitConnectionFactoryBean";
-    private static final String RABBIT_ANNOTATION_DRIVEN_CONFIGURATION = "org.springframework.boot.autoconfigure.amqp.RabbitAnnotationDrivenConfiguration";
-
     @Override
-    public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+    public void registerHints(@NonNull RuntimeHints hints, ClassLoader classLoader) {
         registerConnectionDetails(hints, classLoader);
         registerSslBundleConnectionFactoryBean(hints, classLoader);
         registerAnnotationDrivenConfiguration(hints, classLoader);
@@ -45,7 +42,7 @@ public class RabbitMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
 
     private void registerConnectionDetails(RuntimeHints hints, ClassLoader classLoader) {
         try {
-            Class<?> connectionDetails = resolveClass(PROPERTIES_RABBIT_CONNECTION_DETAILS, classLoader);
+            Class<?> connectionDetails = resolveClass(RabbitAmqpClassNames.PROPERTIES_RABBIT_CONNECTION_DETAILS, classLoader);
             Constructor<?> constructor = connectionDetails.getDeclaredConstructor(RabbitProperties.class, SslBundles.class);
             hints.reflection().registerConstructor(constructor, ExecutableMode.INVOKE);
         } catch (NoSuchMethodException ex) {
@@ -55,7 +52,7 @@ public class RabbitMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
 
     private void registerSslBundleConnectionFactoryBean(RuntimeHints hints, ClassLoader classLoader) {
         try {
-            Class<?> connectionFactoryBean = resolveClass(SSL_BUNDLE_RABBIT_CONNECTION_FACTORY_BEAN, classLoader);
+            Class<?> connectionFactoryBean = resolveClass(RabbitAmqpClassNames.SSL_BUNDLE_RABBIT_CONNECTION_FACTORY_BEAN, classLoader);
             Constructor<?> constructor = connectionFactoryBean.getDeclaredConstructor();
             hints.reflection().registerConstructor(constructor, ExecutableMode.INVOKE);
         } catch (NoSuchMethodException ex) {
@@ -65,7 +62,7 @@ public class RabbitMultiSourcesRuntimeHints implements RuntimeHintsRegistrar {
 
     private void registerAnnotationDrivenConfiguration(RuntimeHints hints, ClassLoader classLoader) {
         try {
-            Class<?> annotationDrivenConfiguration = resolveClass(RABBIT_ANNOTATION_DRIVEN_CONFIGURATION, classLoader);
+            Class<?> annotationDrivenConfiguration = resolveClass(RabbitAmqpClassNames.RABBIT_ANNOTATION_DRIVEN_CONFIGURATION, classLoader);
             Method simpleConfigurer = annotationDrivenConfiguration.getDeclaredMethod("simpleListenerConfigurer");
             Method directConfigurer = annotationDrivenConfiguration.getDeclaredMethod("directListenerConfigurer");
             hints.reflection().registerMethod(simpleConfigurer, ExecutableMode.INVOKE);

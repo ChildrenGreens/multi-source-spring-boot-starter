@@ -26,6 +26,7 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.lang.NonNull;
 
 /**
  * Create a corresponding {@link RedisTemplate} and {@link StringRedisTemplate} based on the {@link RedisConnectionFactory} bean.
@@ -34,7 +35,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 public class RedisTemplateRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
     @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+    public void postProcessBeanDefinitionRegistry(@NonNull BeanDefinitionRegistry registry) throws BeansException {
 
         if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
             String[] beanNames = beanFactory.getBeanNamesForType(RedisConnectionFactory.class);
@@ -45,7 +46,7 @@ public class RedisTemplateRegistryPostProcessor implements BeanDefinitionRegistr
                 boolean primary = bd.isPrimary();
 
                 // suffix
-                String suffix = null;
+                String suffix;
                 if (beanName.endsWith(LettuceConnectionFactory.class.getSimpleName())) {
                     suffix = LettuceConnectionFactory.class.getSimpleName();
                 } else {

@@ -1,0 +1,37 @@
+version: 2.1  # CircleCI config schema version
+
+orbs:
+  codecov: codecov/codecov@4  # Official Codecov orb for uploads
+
+jobs:
+  build-and-test:
+    parameters:
+      jdk-version:
+        type: string
+        default: "17.0"
+    docker:
+      - image: cimg/openjdk:<< parameters.jdk-version >>  # Java base image (17/21)
+    steps:
+      - checkout  # Fetch repository code
+      - run:
+          name: Build and test
+          command: mvn clean install -B -V
+      - codecov/upload:
+          file: "influx2-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
+      - codecov/upload:
+          file: "redis-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
+      - codecov/upload:
+          file: "amqp-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
+
+workflows:
+  build-multi-source-starter:
+    jobs:
+      - build-and-test:
+          name: build-and-test-jdk17
+          jdk-version: "17.0"
+      - build-and-test:
+          name: build-and-test-jdk21
+          jdk-version: "21.0"
+      - build-and-test:
+          name: build-and-test-jdk25
+          jdk-version: "25.0"

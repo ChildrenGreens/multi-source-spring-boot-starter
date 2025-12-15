@@ -25,7 +25,11 @@ import org.springframework.boot.autoconfigure.data.redis.RedisConnectionDetails;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.util.ClassUtils;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RedisMultiSourcesRuntimeHintsTests {
 
@@ -35,16 +39,16 @@ class RedisMultiSourcesRuntimeHintsTests {
         new RedisMultiSourcesRuntimeHints().registerHints(hints, getClass().getClassLoader());
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onType(TypeReference.of("org.springframework.boot.autoconfigure.data.redis.PropertiesRedisConnectionDetails")))
+                .onType(TypeReference.of(RedisDataClassNames.PROPERTIES_DATA_REDIS_CONNECTION_DETAILS)))
                 .accepts(hints);
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onConstructor(resolveConstructor("org.springframework.boot.autoconfigure.data.redis.LettuceConnectionConfiguration",
-                        RedisProperties.class, ObjectProvider.class, ObjectProvider.class, ObjectProvider.class, RedisConnectionDetails.class)))
+                .onConstructor(resolveConstructor(RedisDataClassNames.LETTUCE_CONNECTION_CONFIGURATION
+                )))
                 .accepts(hints);
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onMethod(resolveMethod("org.springframework.boot.autoconfigure.data.redis.LettuceConnectionConfiguration",
+                .onMethod(resolveMethod(RedisDataClassNames.LETTUCE_CONNECTION_CONFIGURATION,
                         "createConnectionFactory", ObjectProvider.class, ObjectProvider.class, ClientResources.class)))
                 .accepts(hints);
     }
@@ -57,15 +61,33 @@ class RedisMultiSourcesRuntimeHintsTests {
 
         if (ClassUtils.isPresent("redis.clients.jedis.Jedis", classLoader)) {
             assertThat(RuntimeHintsPredicates.reflection()
-                    .onConstructor(resolveConstructor("org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration",
-                            RedisProperties.class, ObjectProvider.class, ObjectProvider.class, ObjectProvider.class, RedisConnectionDetails.class)))
+                    .onConstructor(resolveConstructor(RedisDataClassNames.JEDIS_CONNECTION_CONFIGURATION
+                    )))
                     .accepts(hints);
 
             assertThat(RuntimeHintsPredicates.reflection()
-                    .onMethod(resolveMethod("org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration",
+                    .onMethod(resolveMethod(RedisDataClassNames.JEDIS_CONNECTION_CONFIGURATION,
                             "createJedisConnectionFactory", ObjectProvider.class)))
                     .accepts(hints);
         }
+    }
+
+    @Test
+    void failsWhenRequiredClassesMissing() {
+        ClassLoader missingClasses = new ClassLoader(getClass().getClassLoader()) {
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                if (name.equals(RedisDataClassNames.PROPERTIES_DATA_REDIS_CONNECTION_DETAILS)) {
+                    throw new ClassNotFoundException(name);
+                }
+                return super.loadClass(name, resolve);
+            }
+        };
+
+        RuntimeHints hints = new RuntimeHints();
+        assertThatThrownBy(() -> new RedisMultiSourcesRuntimeHints().registerHints(hints, missingClasses))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Failed to resolve class for runtime hints");
     }
 
     private Class<?> resolveClass(String className) {
@@ -76,15 +98,15 @@ class RedisMultiSourcesRuntimeHintsTests {
         }
     }
 
-    private java.lang.reflect.Constructor<?> resolveConstructor(String className, Class<?>... parameterTypes) {
+    private Constructor<?> resolveConstructor(String className) {
         try {
-            return resolveClass(className).getDeclaredConstructor(parameterTypes);
+            return resolveClass(className).getDeclaredConstructor(RedisProperties.class, ObjectProvider.class, ObjectProvider.class, ObjectProvider.class, RedisConnectionDetails.class);
         } catch (NoSuchMethodException ex) {
             throw new IllegalStateException("Constructor not found for: " + className, ex);
         }
     }
 
-    private java.lang.reflect.Method resolveMethod(String className, String methodName, Class<?>... parameterTypes) {
+    private Method resolveMethod(String className, String methodName, Class<?>... parameterTypes) {
         try {
             return resolveClass(className).getDeclaredMethod(methodName, parameterTypes);
         } catch (NoSuchMethodException ex) {

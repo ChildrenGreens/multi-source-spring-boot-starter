@@ -28,7 +28,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  *
  * @author ChildrenGreens
  */
-public class InfluxDBMultiSourcesClientRegistrar extends AbstractMultiSourcesRegistrar<InfluxDB2Properties> {
+public class InfluxDB2MultiSourcesClientRegistrar extends AbstractMultiSourcesRegistrar<InfluxDB2Properties> {
     @Override
     void registerBeanDefinitionsForSource(String name, InfluxDB2Properties source, BeanDefinitionRegistry registry, Boolean isPrimary) {
         if (registry instanceof ConfigurableListableBeanFactory beanFactory) {
