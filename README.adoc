@@ -21,6 +21,12 @@ The starters wrap Spring Boot auto-configuration patterns and expose a consisten
 * Spring Boot 4.0.x (pulled in via the parent BOM)
 * One or more of the supported back-end clients (Lettuce or Jedis for Redis, Spring AMQP, InfluxDB Java client)
 
+== Version Compatibility
+
+* Spring Boot 4.0.x -> use starter 3.x
+* Spring Boot 3.5.x -> use starter 2.x
+* Spring Boot 2.7.x -> use starter 1.x
+
 == Modules
 
 [cols="1,1,2",options="header"]
@@ -233,6 +239,10 @@ private InfluxDBClient hkInfluxClient;
 == Validation & builds
 
 Run `mvn validate` to apply license headers and `mvn clean install` to build all modules. Individual modules can be built with `mvn -pl <module> -am package`.
+
+== Feedback
+
+有问题、有优化意见，欢迎提 issues，促进开源更新。
 
 == License
 
