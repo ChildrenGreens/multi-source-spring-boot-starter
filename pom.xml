@@ -68,7 +68,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <spring-boot-dependencies.version>3.5.8</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>3.5.9</spring-boot-dependencies.version>
         <influxdb-client-version>7.4.0</influxdb-client-version>
         <jacoco.version>0.8.13</jacoco.version>
     </properties>
