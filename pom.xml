@@ -154,7 +154,7 @@
                     <licenseSets>
                         <licenseSet>
                             <!-- Template location -->
-                            <header>licence-header.template</header>
+                            <header>build-tools/header.template</header>
                             <properties>
                                 <!-- Values to be substituted in template -->
                                 <inceptionYear>2012</inceptionYear>
