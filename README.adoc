@@ -2,6 +2,7 @@ image:https://dl.circleci.com/status-badge/img/circleci/Uy51fPbZSgy15X8yEZTik4/9
 image:https://codecov.io/gh/ChildrenGreens/multi-source-spring-boot-starter/graph/badge.svg?token=PH5VGC8WOW["codecov", link="https://codecov.io/gh/ChildrenGreens/multi-source-spring-boot-starter"]
 image:https://img.shields.io/maven-central/v/com.childrengreens/multi-source-spring-boot-starter.svg["Maven Central",link="https://central.sonatype.com/artifact/com.childrengreens/multi-source-spring-boot-starter"]
 image:https://img.shields.io/hexpm/l/plug.svg["Apache 2",link="http://www.apache.org/licenses/LICENSE-2.0"]
+image:https://app.codacy.com/project/badge/Grade/a3738cf6522d4ae1b7b16f26271b25d5["Codacy code quality", link="https://app.codacy.com/gh/ChildrenGreens/multi-source-spring-boot-starter/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"]
 
 = Spring Boot Starter for Multi Data Source (Spring Boot 4)
 
