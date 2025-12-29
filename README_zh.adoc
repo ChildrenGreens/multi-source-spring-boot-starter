@@ -1,0 +1,252 @@
+image:https://dl.circleci.com/status-badge/img/circleci/Uy51fPbZSgy15X8yEZTik4/9BCtEUBbuk2MRr4f6NYp6f/tree/main.svg?style=shield["CircleCI", link="https://dl.circleci.com/status-badge/redirect/circleci/Uy51fPbZSgy15X8yEZTik4/9BCtEUBbuk2MRr4f6NYp6f/tree/main"]
+image:https://codecov.io/gh/ChildrenGreens/multi-source-spring-boot-starter/graph/badge.svg?token=PH5VGC8WOW["codecov", link="https://codecov.io/gh/ChildrenGreens/multi-source-spring-boot-starter"]
+image:https://img.shields.io/maven-central/v/com.childrengreens/multi-source-spring-boot-starter.svg["Maven Central",link="https://central.sonatype.com/artifact/com.childrengreens/multi-source-spring-boot-starter"]
+image:https://img.shields.io/hexpm/l/plug.svg["Apache 2",link="http://www.apache.org/licenses/LICENSE-2.0"]
+image:https://app.codacy.com/project/badge/Grade/a3738cf6522d4ae1b7b16f26271b25d5["Codacy code quality", link="https://app.codacy.com/gh/ChildrenGreens/multi-source-spring-boot-starter/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"]
+
+= Spring Boot Starter for Multi Data Source (Spring Boot 4)
+
+生产就绪的 Spring Boot 启动器，让您轻松在单个应用中配置和使用多个 Redis、RabbitMQ 和 InfluxDB 2.x 连接。
+
+== 概述
+
+这些启动器封装了 Spring Boot 自动配置模式，并在 `spring.multi-sources.*` 命名空间下提供统一的配置属性模型。您定义的每个数据源都会生成一组专用的 Spring Bean，让您无需重复编写配置代码即可连接多个后端服务。
+
+== 特性亮点
+
+* 通过纯配置管理多个 Redis、RabbitMQ 和 InfluxDB 2.x 连接。
+* 确定性的 Bean 命名策略（`<sourceName><ClassSimpleName>`）使注入更明确且类型安全。
+* 基于 Spring Boot 4.0.x 和 Java 17 构建，支持熟悉的 `@ConfigurationProperties`。
+
+== 环境要求
+
+* Java 17+
+* Spring Boot 4.0.x（通过父 BOM 引入）
+* 一个或多个支持的后端客户端（Redis 使用 Lettuce 或 Jedis，Spring AMQP，InfluxDB Java 客户端）
+
+== 版本兼容性
+
+* Spring Boot 4.0.x -> 使用 starter 3.x
+* Spring Boot 3.5.x -> 使用 starter 2.x
+* Spring Boot 2.7.x -> 使用 starter 1.x
+
+== 模块
+
+[cols="1,1,2",options="header"]
+|===
+| 模块 | Maven 坐标 | 用途
+| `redis-multi-source-spring-boot-starter` | `com.childrengreens:redis-multi-source-spring-boot-starter` | 配置多个基于 Lettuce 或 Jedis 的 Redis 数据源。
+| `amqp-multi-source-spring-boot-starter` | `com.childrengreens:amqp-multi-source-spring-boot-starter` | 管理多个 RabbitMQ 连接和消息基础设施。
+| `influx2-multi-source-spring-boot-starter` | `com.childrengreens:influx2-multi-source-spring-boot-starter` | 连接多个 InfluxDB 2.x 组织/存储桶。
+| `context-multi-source-spring-boot-starter` | `com.childrengreens:context-multi-source-spring-boot-starter` | 提供共享基础设施的内部支持模块（无需直接使用）。
+|===
+
+== 快速开始
+
+. 将所需的启动器添加到项目中。
+. 为每个连接配置 `spring.multi-sources.<type>` 属性，包括必需的 `primary-key`。
+. 使用 `@Qualifier` 和 `<sourceName><ClassSimpleName>` 命名规则注入生成的 Bean。
+
+=== 依赖示例
+
+[source,xml]
+----
+<dependency>
+    <groupId>com.childrengreens</groupId>
+    <artifactId>redis-multi-source-spring-boot-starter</artifactId>
+    <version>${latest-version}</version>
+</dependency>
+----
+
+需要使用 Jedis 而不是 Lettuce？将客户端添加到项目中：
+
+[source,xml]
+----
+<dependency>
+    <groupId>redis.clients</groupId>
+    <artifactId>jedis</artifactId>
+</dependency>
+----
+
+== 配置参考
+
+=== Redis 多数据源
+
+至少需要指定 `primary-key` 和 `sources` 下的一个或多个条目。每个数据源可以指向独立部署、哨兵模式或集群部署。
+
+[source,properties]
+----
+# 必需的默认数据源
+spring.multi-sources.redis.primary-key=cn
+
+# 独立模式示例
+spring.multi-sources.redis.sources.cn.host=127.0.0.1
+spring.multi-sources.redis.sources.cn.port=6379
+spring.multi-sources.redis.sources.cn.password=changeme
+
+# 哨兵模式示例
+spring.multi-sources.redis.sources.hk.sentinel.master=hk-redis-master
+spring.multi-sources.redis.sources.hk.sentinel.nodes[0]=192.168.1.1:26379
+spring.multi-sources.redis.sources.hk.sentinel.nodes[1]=192.168.1.2:26379
+spring.multi-sources.redis.sources.hk.database=0
+spring.multi-sources.redis.sources.hk.client-type=jedis
+spring.multi-sources.redis.sources.hk.password=changeme
+spring.multi-sources.redis.sources.hk.lettuce.pool.enabled=true
+
+# 集群模式示例
+spring.multi-sources.redis.sources.us.cluster.nodes[0]=127.0.0.1:6379
+spring.multi-sources.redis.sources.us.cluster.nodes[1]=127.0.0.1:6380
+spring.multi-sources.redis.sources.us.cluster.nodes[2]=127.0.0.1:6381
+spring.multi-sources.redis.sources.us.cluster.max-redirects=3
+spring.multi-sources.redis.sources.us.password=changeme
+----
+
+[source,yml]
+----
+spring:
+  multi-sources:
+    redis:
+      primary-key: cn
+      sources:
+        cn:
+          host: 127.0.0.1
+          port: 6379
+          password: changeme
+        hk:
+          client-type: jedis
+          password: changeme
+          sentinel:
+            master: hk-redis-master
+            nodes:
+              - 192.168.1.1:26379
+              - 192.168.1.2:26379
+          database: 0
+          lettuce:
+            pool:
+              enabled: true
+        us:
+          password: changeme
+          cluster:
+            nodes:
+              - 127.0.0.1:6379
+              - 127.0.0.1:6380
+              - 127.0.0.1:6381
+            max-redirects: 3
+----
+
+启动器会为每个数据源注册 `LettuceConnectionFactory` 或 `JedisConnectionFactory`、`RedisTemplate` 和 `StringRedisTemplate`。
+
+=== RabbitMQ 多数据源
+
+[source,properties]
+----
+spring.multi-sources.rabbitmq.primary-key=cn
+
+spring.multi-sources.rabbitmq.sources.cn.host=192.168.1.1
+spring.multi-sources.rabbitmq.sources.cn.port=5672
+spring.multi-sources.rabbitmq.sources.cn.username=guest
+spring.multi-sources.rabbitmq.sources.cn.password=guest
+spring.multi-sources.rabbitmq.sources.cn.virtual-host=/
+
+spring.multi-sources.rabbitmq.sources.hk.host=192.168.1.2
+spring.multi-sources.rabbitmq.sources.hk.port=5672
+spring.multi-sources.rabbitmq.sources.hk.username=guest
+spring.multi-sources.rabbitmq.sources.hk.password=guest
+spring.multi-sources.rabbitmq.sources.hk.virtual-host=/
+----
+
+[source,yml]
+----
+spring:
+  multi-sources:
+    rabbitmq:
+      primary-key: cn
+      sources:
+        cn:
+          host: 192.168.1.1
+          port: 5672
+          username: guest
+          password: guest
+          virtual-host: /
+        hk:
+          host: 192.168.1.2
+          port: 5672
+          username: guest
+          password: guest
+          virtual-host: /
+----
+
+启动器会为每个数据源提供 `CachingConnectionFactory`、`RabbitTemplate`、`RabbitMessagingTemplate` 和 `SimpleRabbitListenerContainerFactory` Bean。
+
+=== InfluxDB 2.x 多数据源
+
+[source,properties]
+----
+spring.multi-sources.influx.primary-key=cn
+
+spring.multi-sources.influx.sources.cn.url=http://127.0.0.1:8086/
+spring.multi-sources.influx.sources.cn.token=CHANGEME
+spring.multi-sources.influx.sources.cn.org=cn-market-data
+spring.multi-sources.influx.sources.cn.bucket=cn-data
+
+spring.multi-sources.influx.sources.hk.url=http://127.0.0.2:8086/
+spring.multi-sources.influx.sources.hk.token=CHANGEME
+spring.multi-sources.influx.sources.hk.org=hk-market-data
+spring.multi-sources.influx.sources.hk.bucket=hk-data
+----
+
+[source,yml]
+----
+spring:
+  multi-sources:
+    influx:
+      primary-key: cn
+      sources:
+        cn:
+          url: http://127.0.0.1:8086/
+          token: CHANGEME
+          org: cn-market-data
+          bucket: cn-data
+        hk:
+          url: http://127.0.0.2:8086/
+          token: CHANGEME
+          org: hk-market-data
+          bucket: hk-data
+----
+
+每个配置的数据源会暴露一个 `InfluxDBClient` Bean。
+
+== Bean 命名策略
+
+Bean 遵循 `<sourceName><ClassSimpleName>` 模式。名为 `cn` 的数据源会生成如 `cnStringRedisTemplate`、`cnCachingConnectionFactory` 或 `cnInfluxDBClient` 等 Bean。使用 `@Qualifier` 显式注入：
+
+[source,java]
+----
+@Autowired
+@Qualifier("hkRedisTemplate")
+private RedisTemplate<String, Object> hkRedisTemplate;
+
+@Autowired
+@Qualifier("usLettuceConnectionFactory")
+private RedisConnectionFactory usConnectionFactory;
+
+@Autowired
+@Qualifier("cnCachingConnectionFactory")
+private CachingConnectionFactory cnRabbitConnectionFactory;
+
+@Autowired
+@Qualifier("hkInfluxDBClient")
+private InfluxDBClient hkInfluxClient;
+----
+
+== 验证与构建
+
+运行 `mvn validate` 应用许可证头，运行 `mvn clean install` 构建所有模块。可以使用 `mvn -pl <module> -am package` 单独构建某个模块。
+
+== 反馈
+
+如有问题或改进建议，请提交 issue 帮助改进项目。
+
+== 许可证
+
+Spring Boot 多数据源启动器采用 https://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 许可证] 发布。
