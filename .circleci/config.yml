@@ -18,10 +18,13 @@ jobs:
           command: mvn clean install -B -V
       - codecov/upload:
           file: "influx2-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
+          version: "v10.0.1"
       - codecov/upload:
           file: "redis-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
+          version: "v10.0.1"
       - codecov/upload:
           file: "amqp-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
+          version: "v10.0.1"
 
 workflows:
   build-multi-source-starter:
