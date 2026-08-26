@@ -17,9 +17,12 @@ package com.childrengreens.multi.source;
 
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.spring.influx.InfluxDB2AutoConfiguration;
+import com.influxdb.spring.influx.InfluxDB2OkHttpClientBuilderProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,8 +52,38 @@ class InfluxDB2MultiSourcesAutoConfigurationTests {
             assertThat(context).hasBean("betaInfluxDBClient");
 
             assertThat(context.getBeansOfType(InfluxDBClient.class))
-                    .containsKeys("alphaInfluxDBClient", "betaInfluxDBClient");
+                    .containsOnlyKeys("alphaInfluxDBClient", "betaInfluxDBClient");
+            assertThat(context.getBean(InfluxDBClient.class))
+                    .isSameAs(context.getBean("alphaInfluxDBClient", InfluxDBClient.class));
+            assertThat(context.getBeanFactory().getBeanDefinition("alphaInfluxDBClient").isPrimary()).isTrue();
+            assertThat(context.getBeanFactory().getBeanDefinition("betaInfluxDBClient").isPrimary()).isFalse();
         });
     }
-}
 
+    @Test
+    void usesCustomOkHttpClientBuilderProviderForEveryClient() {
+        AtomicInteger invocationCount = new AtomicInteger();
+        InfluxDB2OkHttpClientBuilderProvider builderProvider = () -> {
+            invocationCount.incrementAndGet();
+            return new okhttp3.OkHttpClient.Builder();
+        };
+
+        this.contextRunner
+                .withBean(InfluxDB2OkHttpClientBuilderProvider.class, () -> builderProvider)
+                .run((context) -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(invocationCount).hasValue(2);
+                });
+    }
+
+    @Test
+    void doesNotRegisterClientWhenSourcesAreEmpty() {
+        new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(InfluxDB2MultiSourcesAutoConfiguration.class))
+                .withPropertyValues("spring.multi-sources.influx.primary-key=alpha")
+                .run((context) -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(context).doesNotHaveBean(InfluxDBClient.class);
+                });
+    }
+}
