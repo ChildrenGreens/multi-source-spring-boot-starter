@@ -19,9 +19,13 @@ import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import com.influxdb.query.FluxRecord;
+import com.influxdb.spring.health.InfluxDB2HealthIndicatorAutoConfiguration;
 import com.influxdb.spring.influx.InfluxDB2AutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.health.contributor.CompositeHealthContributor;
+import org.springframework.boot.health.contributor.HealthIndicator;
+import org.springframework.boot.health.contributor.Status;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.testcontainers.containers.InfluxDBContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -66,7 +70,8 @@ class InfluxDB2MultiSourcesIT {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(
                         InfluxDB2AutoConfiguration.class,
-                        InfluxDB2MultiSourcesAutoConfiguration.class
+                        InfluxDB2MultiSourcesAutoConfiguration.class,
+                        InfluxDB2HealthIndicatorAutoConfiguration.class
                 ))
                 .withPropertyValues(
                         "spring.multi-sources.influx.primary-key=alpha",
@@ -97,7 +102,18 @@ class InfluxDB2MultiSourcesIT {
 
                     assertThat(queryValues(alpha, ALPHA_BUCKET, ALPHA_ORG)).containsExactly(11L);
                     assertThat(queryValues(beta, BETA_BUCKET, BETA_ORG)).containsExactly(22L);
+
+                    CompositeHealthContributor healthContributor = context.getBean(
+                            "influxDbHealthContributor", CompositeHealthContributor.class);
+                    assertHealthUp(healthContributor, "alphaInfluxDBClient");
+                    assertHealthUp(healthContributor, "betaInfluxDBClient");
                 });
+    }
+
+    private void assertHealthUp(CompositeHealthContributor contributor, String name) {
+        assertThat(contributor.getContributor(name)).isInstanceOf(HealthIndicator.class);
+        HealthIndicator indicator = (HealthIndicator) contributor.getContributor(name);
+        assertThat(indicator.health().getStatus()).isEqualTo(Status.UP);
     }
 
     private Point point(long value) {

@@ -19,6 +19,10 @@ import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.health.DataRedisHealthContributorAutoConfiguration;
+import org.springframework.boot.health.contributor.CompositeHealthContributor;
+import org.springframework.boot.health.contributor.HealthIndicator;
+import org.springframework.boot.health.contributor.Status;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -45,7 +49,8 @@ class RedisMultiSourcesIT {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(
                         DataRedisAutoConfiguration.class,
-                        RedisMultiSourcesAutoConfiguration.class
+                        RedisMultiSourcesAutoConfiguration.class,
+                        DataRedisHealthContributorAutoConfiguration.class
                 ))
                 .withPropertyValues(
                         "spring.multi-sources.redis.primary-key=alpha",
@@ -78,6 +83,17 @@ class RedisMultiSourcesIT {
                     assertThat(alpha.opsForValue().get("shared-key")).isEqualTo("alpha-value");
                     assertThat(beta.opsForValue().get("shared-key")).isEqualTo("beta-value");
                     assertThat(context.getBean(StringRedisTemplate.class)).isSameAs(alpha);
+
+                    CompositeHealthContributor healthContributor = context.getBean(
+                            "redisHealthContributor", CompositeHealthContributor.class);
+                    assertHealthUp(healthContributor, "alphaLettuceConnectionFactory");
+                    assertHealthUp(healthContributor, "betaJedisConnectionFactory");
                 });
+    }
+
+    private void assertHealthUp(CompositeHealthContributor contributor, String name) {
+        assertThat(contributor.getContributor(name)).isInstanceOf(HealthIndicator.class);
+        HealthIndicator indicator = (HealthIndicator) contributor.getContributor(name);
+        assertThat(indicator.health().getStatus()).isEqualTo(Status.UP);
     }
 }

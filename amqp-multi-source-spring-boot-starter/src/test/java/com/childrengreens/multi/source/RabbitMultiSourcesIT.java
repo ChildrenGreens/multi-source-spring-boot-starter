@@ -23,7 +23,11 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.amqp.autoconfigure.RabbitAutoConfiguration;
+import org.springframework.boot.amqp.autoconfigure.health.RabbitHealthContributorAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.health.contributor.CompositeHealthContributor;
+import org.springframework.boot.health.contributor.HealthIndicator;
+import org.springframework.boot.health.contributor.Status;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -51,7 +55,8 @@ class RabbitMultiSourcesIT {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(
                         RabbitAutoConfiguration.class,
-                        RabbitMultiSourcesAutoConfiguration.class
+                        RabbitMultiSourcesAutoConfiguration.class,
+                        RabbitHealthContributorAutoConfiguration.class
                 ))
                 .withPropertyValues(
                         "spring.multi-sources.rabbitmq.primary-key=alpha",
@@ -95,6 +100,17 @@ class RabbitMultiSourcesIT {
                     assertThat(alpha.receiveAndConvert(QUEUE_NAME, 5_000)).isEqualTo("alpha-message");
                     assertThat(beta.receiveAndConvert(QUEUE_NAME, 5_000)).isEqualTo("beta-message");
                     assertThat(context.getBean(RabbitTemplate.class)).isSameAs(alpha);
+
+                    CompositeHealthContributor healthContributor = context.getBean(
+                            "rabbitHealthContributor", CompositeHealthContributor.class);
+                    assertHealthUp(healthContributor, "alphaRabbitTemplate");
+                    assertHealthUp(healthContributor, "betaRabbitTemplate");
                 });
+    }
+
+    private void assertHealthUp(CompositeHealthContributor contributor, String name) {
+        assertThat(contributor.getContributor(name)).isInstanceOf(HealthIndicator.class);
+        HealthIndicator indicator = (HealthIndicator) contributor.getContributor(name);
+        assertThat(indicator.health().getStatus()).isEqualTo(Status.UP);
     }
 }
