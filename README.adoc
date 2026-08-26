@@ -16,19 +16,22 @@ The starters wrap Spring Boot auto-configuration patterns and expose a consisten
 
 * Manage multiple Redis, RabbitMQ, and InfluxDB 2.x connections using pure configuration.
 * Deterministic bean naming (`<sourceName><ClassSimpleName>`) keeps injection explicit and type-safe.
-* Built on Spring Boot 4.0.x and Java 17 with familiar `@ConfigurationProperties` support.
+* Built on Spring Boot 4.1.x and Java 17 with familiar `@ConfigurationProperties` support.
 
 == Requirements
 
 * Java 17+
-* Spring Boot 4.0.x (pulled in via the parent BOM)
+* Spring Boot 4.1.x (pulled in via the parent BOM)
 * One or more of the supported back-end clients (Lettuce or Jedis for Redis, Spring AMQP, InfluxDB Java client)
 
 == Version Compatibility
 
-* Spring Boot 4.0.x -> use starter 3.x
+* Spring Boot 4.1.x -> use starter 3.1.x
+* Spring Boot 4.0.x -> use starter 3.0.x
 * Spring Boot 3.5.x -> use starter 2.x
 * Spring Boot 2.7.x -> use starter 1.x
+
+The starters access selected Spring Boot auto-configuration internals through reflection. Use the matching starter minor release line for your Spring Boot minor version.
 
 == Modules
 

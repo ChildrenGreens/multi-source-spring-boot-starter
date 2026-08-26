@@ -16,19 +16,22 @@ image:https://app.codacy.com/project/badge/Grade/a3738cf6522d4ae1b7b16f26271b25d
 
 * 通过纯配置管理多个 Redis、RabbitMQ 和 InfluxDB 2.x 连接。
 * 确定性的 Bean 命名策略（`<sourceName><ClassSimpleName>`）使注入更明确且类型安全。
-* 基于 Spring Boot 4.0.x 和 Java 17 构建，支持熟悉的 `@ConfigurationProperties`。
+* 基于 Spring Boot 4.1.x 和 Java 17 构建，支持熟悉的 `@ConfigurationProperties`。
 
 == 环境要求
 
 * Java 17+
-* Spring Boot 4.0.x（通过父 BOM 引入）
+* Spring Boot 4.1.x（通过父 BOM 引入）
 * 一个或多个支持的后端客户端（Redis 使用 Lettuce 或 Jedis，Spring AMQP，InfluxDB Java 客户端）
 
 == 版本兼容性
 
-* Spring Boot 4.0.x -> 使用 starter 3.x
+* Spring Boot 4.1.x -> 使用 starter 3.1.x
+* Spring Boot 4.0.x -> 使用 starter 3.0.x
 * Spring Boot 3.5.x -> 使用 starter 2.x
 * Spring Boot 2.7.x -> 使用 starter 1.x
+
+Starter 会通过反射访问部分 Spring Boot 自动配置内部实现，请根据 Spring Boot 的次版本选择对应的 Starter 次版本系列。
 
 == 模块
 
