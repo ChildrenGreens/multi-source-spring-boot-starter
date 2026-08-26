@@ -25,6 +25,16 @@ jobs:
       - codecov/upload:
           file: "amqp-multi-source-spring-boot-starter/target/site/jacoco/jacoco.xml"
           version: "v10.0.1"
+  integration-tests:
+    docker:
+      - image: cimg/openjdk:17.0
+    steps:
+      - checkout
+      # Testcontainers uses the remote Docker daemon to run real service instances.
+      - setup_remote_docker
+      - run:
+          name: Run integration tests
+          command: mvn verify -Pintegration-tests -B -V
 
 workflows:
   build-multi-source-starter:
@@ -38,3 +48,4 @@ workflows:
       - build-and-test:
           name: build-and-test-jdk25
           jdk-version: "25.0"
+      - integration-tests
